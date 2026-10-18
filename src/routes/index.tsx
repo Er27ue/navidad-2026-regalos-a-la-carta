@@ -5,6 +5,7 @@ import Lenis from "lenis";
 import { Hero } from "@/components/intro/Hero";
 import { AboutYaritza, ThankYou, Welcome } from "@/components/sections/Story";
 import { Catalog, StartChoice, type Filter } from "@/components/cards/Catalog";
+import { BottomBar, ContactSection, TopBar } from "@/components/layout/Navigation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,7 +32,7 @@ function Index() {
     id = requestAnimationFrame(raf);
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a[href^="#"]');
-      if (a) { e.preventDefault(); lenis.scrollTo(a.getAttribute("href")!, { offset: -20 }); }
+      if (a) { e.preventDefault(); lenis.scrollTo(a.getAttribute("href")!, { offset: -76 }); }
     };
     document.addEventListener("click", onClick);
     (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
@@ -41,20 +42,23 @@ function Index() {
   const pick = (f: Filter) => {
     setFilter(f);
     const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-    if (lenis) lenis.scrollTo("#catalogo", { offset: -20 });
+    if (lenis) lenis.scrollTo("#catalogo", { offset: -76 });
     else document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className="overflow-x-hidden">
+      <TopBar />
+      <main className="overflow-x-clip pb-20 pt-0 md:pb-0 md:pt-14">
         <Hero />
         <Welcome />
         <AboutYaritza />
         <StartChoice onPick={pick} />
         <Catalog filter={filter} setFilter={setFilter} />
+        <ContactSection />
         <ThankYou />
       </main>
+      <BottomBar />
     </MotionConfig>
   );
 }
