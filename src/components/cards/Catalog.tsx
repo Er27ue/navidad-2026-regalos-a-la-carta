@@ -56,7 +56,7 @@ function CategoryFilter({ value, onChange }: { value: Filter; onChange: (f: Filt
     <LayoutGroup>
       <div className="flex flex-wrap justify-center gap-2">
         {opts.map((o) => (
-          <button key={o.id} onClick={() => onChange(o.id)} className="relative rounded-full px-5 py-2.5 text-xs font-medium uppercase tracking-[0.18em]">
+          <button key={o.id} onClick={() => onChange(o.id)} className="relative min-h-11 rounded-full px-5 py-2.5 text-xs font-medium uppercase tracking-[0.18em]">
             {value === o.id && (
               <motion.span layoutId="pill" className="absolute inset-0 rounded-full bg-wine" transition={{ type: "spring", stiffness: 260, damping: 28 }} />
             )}
@@ -141,12 +141,16 @@ function CardModal({ list, index, onClose, onMove, selectedIds, onToggleSelectio
 export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: { filter: Filter; setFilter: (f: Filter) => void; selectedIds: string[]; onToggleSelection: (id: string) => void }) {
   const [open, setOpen] = useState<number | null>(null);
   const [query, setQuery] = useState("");
+  const [letter, setLetter] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
   const list = useMemo(() => {
     const categoryList = filter === "todas" ? cards : cards.filter((c) => c.category === filter);
     const normalized = query.trim().toLocaleLowerCase();
-    return normalized ? categoryList.filter((c) => c.name.toLocaleLowerCase().includes(normalized)) : categoryList;
-  }, [filter, query]);
+    return categoryList.filter((card) =>
+      (!normalized || card.name.toLocaleLowerCase().includes(normalized)) &&
+      (filter !== "iniciales" || !letter || card.name.toLocaleUpperCase().endsWith(letter)),
+    );
+  }, [filter, query, letter]);
   const visible = list.slice(0, visibleCount);
   return (
     <section id="catalogo" className="relative bg-[#fffefa] px-4 py-20 md:px-8 md:py-24">
@@ -156,7 +160,14 @@ export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: {
         <Sparkle className="mx-auto mt-4 w-6" />
       </div>
       <div className="sticky top-0 z-20 mx-auto mt-8 max-w-7xl bg-[#fffefa]/95 py-3 backdrop-blur-md md:top-14">
-        <div className="mx-auto max-w-5xl"><CategoryFilter value={filter} onChange={(next) => { setFilter(next); setVisibleCount(12); }} /></div>
+        <div className="mx-auto max-w-5xl"><CategoryFilter value={filter} onChange={(next) => { setFilter(next); setLetter(""); setVisibleCount(12); }} /></div>
+        {filter === "iniciales" && (
+          <div aria-label="Filtrar letras" className="mx-auto mt-3 flex max-w-5xl gap-1 overflow-x-auto pb-1">
+            {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((character) => (
+              <button key={character} onClick={() => { setLetter((current) => current === character ? "" : character); setVisibleCount(12); }} aria-pressed={letter === character} className={`min-h-11 min-w-9 rounded-full text-xs font-semibold ${letter === character ? "bg-wine text-white" : "text-olive hover:bg-wine/10"}`}>{character}</button>
+            ))}
+          </div>
+        )}
         <label className="mx-auto mt-3 flex min-h-12 max-w-md items-center gap-3 rounded-full border border-wine/15 bg-white px-4 text-sm text-ink shadow-sm">
           <Search aria-hidden className="h-4 w-4 text-olive" />
           <span className="sr-only">Buscar tarjetas por nombre</span>
