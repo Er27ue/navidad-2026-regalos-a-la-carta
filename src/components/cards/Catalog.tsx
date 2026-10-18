@@ -90,7 +90,7 @@ function GiftCard({ card, onOpen }: { card: Card; onOpen: () => void }) {
 }
 
 function CardModal({ list, index, onClose, onMove }: { list: Card[]; index: number; onClose: () => void; onMove: (d: number) => void }) {
-  const card = list[index];
+  const card = list[index] ?? list[0]!;
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
