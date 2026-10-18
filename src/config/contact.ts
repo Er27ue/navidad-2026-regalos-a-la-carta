@@ -9,6 +9,6 @@ export const INSTAGRAM = "yaritzamaderacreations";
 const hasWhatsAppNumber = /^\d{8,15}$/.test(WHATSAPP_NUMBER);
 
 export function whatsappUrl(message: string) {
-  if (!hasWhatsAppNumber) return `https://instagram.com/${INSTAGRAM}`;
+  if (!hasWhatsAppNumber) return `https://wa.me/?text=${encodeURIComponent(message)}`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
