@@ -25,7 +25,7 @@ export function Sway({ children, duration = 7, deg = 3, origin = "50% 100%", cla
     <motion.div
       className={className}
       style={{ transformOrigin: origin, ...(style as object) }}
-      animate={reduce ? undefined : { rotate: [-deg, deg, -deg] }}
+      animate={reduce ? false : { rotate: [-deg, deg, -deg] }}
       transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
     >
       {children}
