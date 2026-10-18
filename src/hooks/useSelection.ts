@@ -4,6 +4,7 @@ const STORAGE_KEY = "yaritza-navidad-2026-seleccion";
 
 export function useSelection() {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
     try {
       const value = window.localStorage.getItem(STORAGE_KEY);
       const parsed: unknown = value ? JSON.parse(value) : [];
