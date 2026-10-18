@@ -1,4 +1,4 @@
-export type CategoryId = "iniciales" | "frases" | "santa" | "nacimiento" | "decoracion";
+export type CategoryId = "iniciales" | "santa" | "nacimiento" | "florales" | "frases" | "animales" | "gnomos" | "puertas" | "detalles";
 
 export interface Card {
   id: string;
@@ -9,15 +9,19 @@ export interface Card {
 }
 
 export const categories: { id: CategoryId; label: string; blurb: string; cover: string }[] = [
-  { id: "iniciales", label: "Iniciales", blurb: "Letras vestidas de acebo", cover: "/cards/001.jpg" },
-  { id: "frases", label: "Frases navideñas", blurb: "Merry Christmas, Ho Ho Ho y más", cover: "/cards/021.jpg" },
-  { id: "santa", label: "Santa y amigos", blurb: "Santa, renos, gnomos y ternura", cover: "/cards/020.jpg" },
-  { id: "nacimiento", label: "Nacimiento", blurb: "El verdadero sentido", cover: "/cards/032.jpg" },
-  { id: "decoracion", label: "Decoración", blurb: "Coronas, lazos, velas y pinos", cover: "/cards/018.jpg" },
+  { id: "iniciales", label: "Letras", blurb: "Letras ilustradas para personalizar", cover: "/cards/001.jpg" },
+  { id: "santa", label: "Santa Claus", blurb: "Santa y sus personajes navideños", cover: "/cards/020.jpg" },
+  { id: "nacimiento", label: "Natividad", blurb: "Ilustraciones del nacimiento", cover: "/cards/032.jpg" },
+  { id: "florales", label: "Florales y coronas", blurb: "Ramas, flores y coronas", cover: "/cards/018.jpg" },
+  { id: "frases", label: "Frases", blurb: "Mensajes para compartir", cover: "/cards/021.jpg" },
+  { id: "animales", label: "Animalitos", blurb: "Compañeros de invierno", cover: "/cards/025.jpg" },
+  { id: "gnomos", label: "Gnomos y duendes", blurb: "Pequeños personajes festivos", cover: "/cards/089.jpg" },
+  { id: "puertas", label: "Puertas y casas", blurb: "Entradas y casitas de Navidad", cover: "/cards/016.jpg" },
+  { id: "detalles", label: "Detalles navideños", blurb: "Moños, estrellas, velas y más", cover: "/cards/030.jpg" },
 ];
 
 // [number, name, category] — image lives at /public/cards/NNN.jpg
-const raw: [number, string, CategoryId][] = [
+const raw: [number, string, CategoryId | "decoracion"][] = [
   [1, "Inicial P", "iniciales"], [2, "Inicial B", "iniciales"], [3, "Inicial I", "iniciales"],
   [4, "Inicial N", "iniciales"], [5, "Inicial K", "iniciales"], [6, "Inicial T", "iniciales"],
   [7, "Inicial F", "iniciales"], [8, "Inicial Y", "iniciales"], [9, "Inicial M", "iniciales"],
@@ -55,9 +59,20 @@ const raw: [number, string, CategoryId][] = [
   [103, "Esferas colgantes", "decoracion"], [104, "Happy Holidays", "frases"],
 ];
 
-export const cards: Card[] = raw.map(([n, name, category]) => ({
+function assignCategory(name: string, original: CategoryId | "decoracion"): CategoryId {
+  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (original === "iniciales" || original === "frases" || original === "nacimiento") return original;
+  if (/gnomo|duende/.test(normalized)) return "gnomos";
+  if (/puerta|casita|casa roja/.test(normalized)) return "puertas";
+  if (/reno|renito|petirrojo|osito|oso|animal/.test(normalized)) return "animales";
+  if (original === "santa") return "santa";
+  if (/flor|corona|guirnalda|ramo|eucalipto|poinsettia|rama/.test(normalized)) return "florales";
+  return "detalles";
+}
+
+export const cards: Card[] = raw.map(([n, name, originalCategory]) => ({
   id: `c${n}`,
   name,
-  category,
+  category: assignCategory(name, originalCategory),
   image: `/cards/${String(n).padStart(3, "0")}.jpg`,
 }));

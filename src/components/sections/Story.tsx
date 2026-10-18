@@ -29,7 +29,7 @@ export function Welcome() {
     "Hoy te presentamos nuestro catálogo de tarjetas Navidad 2026, repleto de creatividad, variedad y lo más importante, frases poderosas, acompañadas de diseños chulísimos para esta Navidad.",
   ];
   return (
-    <section ref={ref} id="bienvenida" className="relative overflow-hidden px-6 py-32 md:py-44">
+    <section ref={ref} id="bienvenida" className="relative overflow-hidden bg-[#fbf5ef] px-6 py-24 md:py-36">
       <LeafFrame target={ref} />
       <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} className="relative mx-auto max-w-2xl text-center">
         <motion.h2 variants={line} className="eyebrow text-3xl font-semibold text-wine md:text-4xl">¡Hola!</motion.h2>
@@ -53,7 +53,7 @@ export function AboutYaritza() {
     "En 2003 descubro el amplio mundo de las tarjetas y no es hasta 2006 cuando realizo mi primera colocación en tienda, ininterrumpida hasta el día de hoy.",
   ];
   return (
-    <section ref={ref} id="yaritza" className="relative px-6 py-28 md:py-40">
+    <section ref={ref} id="yaritza" className="relative bg-[#f0f2e9] px-6 py-24 md:py-36">
       <div className="mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-[0.9fr_1.1fr]">
         <motion.div style={{ y: imgY }} className="relative mx-auto w-full max-w-sm">
           <motion.div
@@ -99,6 +99,7 @@ export function ThankYou() {
         </motion.p>
         <motion.span variants={line} className="mt-8 inline-block rounded-full bg-peach px-5 py-2 text-sm font-semibold text-wine">Colosenses 3: 23-24</motion.span>
         <motion.p variants={line} className="mt-16 text-xs tracking-[0.3em] text-olive">@yaritzamaderacreations</motion.p>
+        <motion.a variants={line} href="#inicio" className="mt-8 inline-flex min-h-12 items-center rounded-full border border-wine/25 px-6 text-xs font-semibold uppercase tracking-[0.16em] text-wine transition-colors hover:bg-wine hover:text-white">Volver al inicio</motion.a>
       </motion.div>
     </section>
   );
