@@ -1,24 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MotionConfig } from "framer-motion";
+import { useEffect, useState } from "react";
+import Lenis from "lenis";
+import { Hero } from "@/components/intro/Hero";
+import { AboutYaritza, ThankYou, Welcome } from "@/components/sections/Story";
+import { Catalog, StartChoice, type Filter } from "@/components/cards/Catalog";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Catálogo Tarjetas de Regalo Navidad 2026 · Yaritza Madera Creations" },
+      { name: "description", content: "Descubre más de 100 tarjetas de regalo navideñas ilustradas por @yaritzamaderacreations." },
+      { property: "og:title", content: "Catálogo Tarjetas de Regalo Navidad 2026" },
+      { property: "og:description", content: "Tarjetas navideñas ilustradas por Yaritza Madera para tus regalos y tu negocio." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const [filter, setFilter] = useState<Filter>("todas");
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const lenis = new Lenis({ lerp: 0.09 });
+    let id = 0;
+    const raf = (t: number) => { lenis.raf(t); id = requestAnimationFrame(raf); };
+    id = requestAnimationFrame(raf);
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest('a[href^="#"]');
+      if (a) { e.preventDefault(); lenis.scrollTo(a.getAttribute("href")!, { offset: -20 }); }
+    };
+    document.addEventListener("click", onClick);
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+    return () => { cancelAnimationFrame(id); lenis.destroy(); document.removeEventListener("click", onClick); };
+  }, []);
+
+  const pick = (f: Filter) => {
+    setFilter(f);
+    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+    if (lenis) lenis.scrollTo("#catalogo", { offset: -20 });
+    else document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <main className="overflow-x-hidden">
+        <Hero />
+        <Welcome />
+        <AboutYaritza />
+        <StartChoice onPick={pick} />
+        <Catalog filter={filter} setFilter={setFilter} />
+        <ThankYou />
+      </main>
+    </MotionConfig>
   );
 }
