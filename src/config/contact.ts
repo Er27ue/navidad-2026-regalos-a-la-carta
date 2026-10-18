@@ -1,10 +1,11 @@
 /**
- * Actualiza estos tres valores cuando Yaritza confirme los datos de contacto.
+ * Datos de contacto confirmados por Yaritza. El correo queda pendiente de confirmar.
  * No se definen precios, mínimos de compra ni paquetes.
  */
-export const WHATSAPP_NUMBER = "[NUMERO_CON_CODIGO_DE_PAIS_SIN_SIGNOS]";
+export const WHATSAPP_NUMBER = "18296491680";
 export const EMAIL = "[CORREO]";
 export const INSTAGRAM = "yaritzamaderacreations";
+export const INSTAGRAM_SECONDARY = "mamaandariega";
 
 const hasWhatsAppNumber = /^\d{8,15}$/.test(WHATSAPP_NUMBER);
 
