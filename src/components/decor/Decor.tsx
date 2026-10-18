@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
-const draw = (delay = 0, duration = 1.6): { initial: object; animate: object; transition: Transition } => ({
+const draw = (delay = 0, duration = 1.6): { initial: { pathLength: number; opacity: number }; animate: { pathLength: number; opacity: number }; transition: Transition } => ({
   initial: { pathLength: 0, opacity: 0 },
   animate: { pathLength: 1, opacity: 1 },
   transition: { pathLength: { delay, duration, ease: EASE }, opacity: { delay, duration: 0.3 } },
@@ -24,7 +24,7 @@ export function Sway({ children, duration = 7, deg = 3, origin = "50% 100%", cla
   return (
     <motion.div
       className={className}
-      style={{ transformOrigin: origin, ...style }}
+      style={{ transformOrigin: origin, ...(style as object) }}
       animate={reduce ? undefined : { rotate: [-deg, deg, -deg] }}
       transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
     >
@@ -94,7 +94,7 @@ export function Sparkle({ className, style, delay = 0 }: DecorProps) {
     <motion.svg
       viewBox="-12 -12 24 24"
       className={className}
-      style={style}
+      style={style as object}
       fill="none"
       stroke="var(--berry)"
       strokeWidth={1.2}
