@@ -2,47 +2,19 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { Heart, MessageCircle, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cards, categories, type Card, type CategoryId } from "@/data/cards";
-import { EASE, Sparkle } from "../decor/Decor";
+import { EASE } from "../decor/Decor";
 import { whatsappUrl } from "@/config/contact";
 
 type Filter = CategoryId | "todas";
 
 export function StartChoice({ onPick }: { onPick: (c: Filter) => void }) {
   return (
-    <section id="eleccion" className="relative px-6 py-28">
-      <motion.h2
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, ease: EASE }}
-        className="text-center font-script text-6xl leading-tight text-wine md:text-7xl"
-      >
-        Empecemos con tu elección:
-      </motion.h2>
-      <div className="mx-auto mt-16 grid max-w-6xl grid-cols-2 gap-5 md:grid-cols-5">
-        {categories.map((c, i) => (
-          <motion.button
-            key={c.id}
-            onClick={() => onPick(c.id)}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: EASE, delay: i * 0.09 }}
-            whileHover={{ y: -8, transition: { type: "spring", stiffness: 120, damping: 20 } }}
-            className="group overflow-hidden rounded-3xl bg-card text-left shadow-soft"
-          >
-            <div className="aspect-square overflow-hidden bg-card">
-              <img src={c.cover} alt="" loading="lazy" className="h-full w-full object-contain p-3 transition-transform duration-700 group-hover:scale-105" />
-            </div>
-            <div className="px-5 pb-5 pt-2">
-              <p className="font-script text-3xl text-wine">{c.label}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{c.blurb}</p>
-            </div>
-          </motion.button>
-        ))}
-      </div>
-      <div className="mt-10 text-center">
-        <button onClick={() => onPick("todas")} className="eyebrow text-xs text-olive underline-offset-8 hover:underline">
+    <section id="eleccion" className="bg-cream px-5 py-6 text-center md:px-8 md:py-8">
+      <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-3 sm:flex-row">
+        <motion.h2 initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }} className="font-script text-4xl leading-tight text-wine md:text-5xl">
+          Encuentra tu favorita
+        </motion.h2>
+        <button onClick={() => onPick("todas")} className="min-h-11 rounded-full border border-wine/30 px-6 text-sm font-semibold text-wine transition-colors hover:bg-wine hover:text-white">
           Ver todas las tarjetas
         </button>
       </div>
@@ -54,9 +26,9 @@ function CategoryFilter({ value, onChange }: { value: Filter; onChange: (f: Filt
   const opts: { id: Filter; label: string }[] = [{ id: "todas", label: "Todas" }, ...categories.map((c) => ({ id: c.id, label: c.label }))];
   return (
     <LayoutGroup>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div aria-label="Filtrar por categoría" className="no-scrollbar flex snap-x snap-mandatory justify-start gap-1 overflow-x-auto px-1 md:justify-center">
         {opts.map((o) => (
-          <button key={o.id} onClick={() => onChange(o.id)} className="relative min-h-11 rounded-full px-5 py-2.5 text-xs font-medium uppercase tracking-[0.18em]">
+          <button key={o.id} onClick={() => onChange(o.id)} className="relative min-h-10 shrink-0 snap-start rounded-full px-4 py-2 text-[11px] font-medium tracking-wide sm:px-5 sm:text-xs">
             {value === o.id && (
               <motion.span layoutId="pill" className="absolute inset-0 rounded-full bg-wine" transition={{ type: "spring", stiffness: 260, damping: 28 }} />
             )}
@@ -153,28 +125,27 @@ export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: {
   }, [filter, query, letter]);
   const visible = list.slice(0, visibleCount);
   return (
-    <section id="catalogo" className="relative bg-[#fffefa] px-4 py-20 md:px-8 md:py-24">
+    <section id="catalogo" className="relative scroll-mt-2 bg-cream px-4 pb-12 pt-8 md:scroll-mt-20 md:px-8 md:pb-20 md:pt-12">
       <div className="text-center">
-        <p className="eyebrow text-xs text-olive">Mostrando {visible.length} de {list.length} diseños</p>
-        <h2 className="mt-2 font-script text-6xl text-wine md:text-7xl">Nuestras tarjetas</h2>
-        <Sparkle className="mx-auto mt-4 w-6" />
+        <p className="eyebrow text-[10px] text-olive sm:text-xs">{list.length} diseños para elegir</p>
+        <h2 className="mt-1 font-script text-5xl text-wine sm:text-6xl md:text-7xl">Nuestras tarjetas</h2>
       </div>
-      <div className="sticky top-0 z-20 mx-auto mt-8 max-w-7xl bg-[#fffefa]/95 py-3 backdrop-blur-md md:top-14">
+      <div className="sticky top-0 z-20 mx-auto mt-4 max-w-7xl bg-cream/95 py-2 backdrop-blur-md md:top-14">
         <div className="mx-auto max-w-5xl"><CategoryFilter value={filter} onChange={(next) => { setFilter(next); setLetter(""); setVisibleCount(12); }} /></div>
         {filter === "iniciales" && (
-          <div aria-label="Filtrar letras" className="mx-auto mt-3 flex max-w-5xl gap-1 overflow-x-auto pb-1">
+          <div aria-label="Filtrar letras" className="no-scrollbar mx-auto mt-2 flex max-w-5xl gap-1 overflow-x-auto pb-1">
             {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((character) => (
               <button key={character} onClick={() => { setLetter((current) => current === character ? "" : character); setVisibleCount(12); }} aria-pressed={letter === character} className={`min-h-11 min-w-9 rounded-full text-xs font-semibold ${letter === character ? "bg-wine text-white" : "text-olive hover:bg-wine/10"}`}>{character}</button>
             ))}
           </div>
         )}
-        <label className="mx-auto mt-3 flex min-h-12 max-w-md items-center gap-3 rounded-full border border-wine/15 bg-white px-4 text-sm text-ink shadow-sm">
+        <label className="mx-auto mt-2 flex min-h-10 max-w-md items-center gap-3 rounded-full border border-wine/15 bg-white/80 px-4 text-sm text-ink">
           <Search aria-hidden className="h-4 w-4 text-olive" />
           <span className="sr-only">Buscar tarjetas por nombre</span>
           <input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(12); }} placeholder="Buscar diseño por nombre" className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
         </label>
       </div>
-      <motion.div layout className="mx-auto mt-12 grid max-w-7xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4">
+      <motion.div layout className="mx-auto mt-4 grid max-w-7xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:mt-6 md:grid-cols-4 md:gap-6">
         <AnimatePresence mode="popLayout">
           {visible.map((c, i) => <GiftCard key={c.id} card={c} onOpen={() => setOpen(i)} selected={selectedIds.includes(c.id)} onToggleSelection={() => onToggleSelection(c.id)} />)}
         </AnimatePresence>
@@ -190,3 +161,4 @@ export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: {
 }
 
 export type { Filter };
+
