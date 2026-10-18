@@ -60,7 +60,7 @@ const raw: [number, string, CategoryId][] = [
 ];
 
 function assignCategory(name: string, original: CategoryId): CategoryId {
-  const normalized = name.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   if (original === "iniciales" || original === "frases" || original === "nacimiento") return original;
   if (/gnomo|duende/.test(normalized)) return "gnomos";
   if (/puerta|casita|casa roja/.test(normalized)) return "puertas";
