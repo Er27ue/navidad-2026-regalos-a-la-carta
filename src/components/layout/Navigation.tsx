@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp, Instagram, Mail, MessageCircle, Sparkles, X } from "lucide-react";
+import { ArrowUp, Heart, Instagram, Mail, MessageCircle, Sparkles, X } from "lucide-react";
 import type { Card } from "@/data/cards";
 import { EMAIL, INSTAGRAM, INSTAGRAM_SECONDARY, whatsappUrl } from "@/config/contact";
 
 const requestMessage = "Hola Yaritza, quiero elegir tarjetas de regalo navideñas.";
 
-export function ContactSection() {
+export function ContactSection({ count, onSelection }: { count: number; onSelection: () => void }) {
   const emailReady = EMAIL.includes("@") && !EMAIL.startsWith("[");
   return (
-    <section id="contacto" className="relative overflow-hidden bg-wine px-5 py-20 text-primary-foreground md:px-8 md:py-28">
+    <section id="contacto" className="relative overflow-hidden bg-wine px-5 py-12 text-primary-foreground md:px-8 md:py-16">
       <div aria-hidden className="pointer-events-none absolute -right-14 -top-16 h-56 w-56 rounded-full border border-white/10 md:h-72 md:w-72" />
       <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-14 h-64 w-64 rounded-full border border-white/10" />
       <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="relative mx-auto max-w-3xl text-center">
         <p className="eyebrow text-[10px] text-white/75">Para tu tienda y tus regalos</p>
-        <h2 className="mt-3 font-script text-6xl md:text-7xl">¿Listo para elegir?</h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/85 md:text-base">Escríbenos y te ayudamos a elegir los diseños para tu tienda.</p>
-        <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="mt-3 font-script text-5xl sm:text-6xl md:text-7xl">¿Lista para elegir?</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/85 md:text-base">Escríbenos y te ayudamos a elegir tus diseños.</p>
+        <div className="mx-auto mt-6 grid max-w-3xl gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          <button onClick={onSelection} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white/15 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+            <Heart aria-hidden className="h-5 w-5" /> Mi selección ({count})
+          </button>
           <a href={whatsappUrl(requestMessage)} target="_blank" rel="noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-5 py-4 text-sm font-semibold text-wine transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
             <MessageCircle aria-hidden className="h-5 w-5" /> WhatsApp
           </a>
@@ -73,7 +76,7 @@ export function BottomBar({ count, onSelection }: { count: number; onSelection: 
 export function SelectionPanel({ cards, onRemove, onClose }: { cards: Card[]; onRemove: (id: string) => void; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const names = cards.map((card) => card.name);
-  const message = `Hola Yaritza, me interesan estas tarjetas: ${names.join(", ")}`;
+  const message = `Hola Yaritza, me interesan estas tarjetas:\n${names.map((name, index) => `${index + 1}. ${name}`).join("\n")}`;
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -120,3 +123,4 @@ export function SelectionPanel({ cards, onRemove, onClose }: { cards: Card[]; on
     </AnimatePresence>
   );
 }
+
