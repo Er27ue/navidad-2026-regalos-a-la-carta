@@ -1,8 +1,9 @@
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Heart, Search } from "lucide-react";
+import { Heart, MessageCircle, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cards, categories, type Card, type CategoryId } from "@/data/cards";
 import { EASE, Sparkle } from "../decor/Decor";
+import { whatsappUrl } from "@/config/contact";
 
 type Filter = CategoryId | "todas";
 
@@ -86,7 +87,7 @@ function GiftCard({ card, onOpen, selected, onToggleSelection }: { card: Card; o
   );
 }
 
-function CardModal({ list, index, onClose, onMove }: { list: Card[]; index: number; onClose: () => void; onMove: (d: number) => void }) {
+function CardModal({ list, index, onClose, onMove, selectedIds, onToggleSelection }: { list: Card[]; index: number; onClose: () => void; onMove: (d: number) => void; selectedIds: string[]; onToggleSelection: (id: string) => void }) {
   const card = list[index] ?? list[0]!;
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -98,14 +99,14 @@ function CardModal({ list, index, onClose, onMove }: { list: Card[]; index: numb
     return () => window.removeEventListener("keydown", h);
   }, [onClose, onMove]);
   return (
-    <motion.div className="fixed inset-0 z-40 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <div className="absolute inset-0 bg-ink/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div
         initial={{ y: 40, scale: 0.95 }}
         animate={{ y: 0, scale: 1 }}
         exit={{ y: 40, scale: 0.95 }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        className="relative w-full max-w-lg rounded-3xl bg-card p-6 shadow-lift"
+        className="relative max-h-[92svh] w-full overflow-y-auto rounded-t-3xl bg-card p-5 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-lift sm:max-h-[90svh] sm:max-w-lg sm:rounded-3xl sm:p-6"
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -116,7 +117,7 @@ function CardModal({ list, index, onClose, onMove }: { list: Card[]; index: numb
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.35, ease: EASE }}
-            className="mx-auto max-h-[60vh] w-full object-contain"
+            className="mx-auto max-h-[48svh] w-full object-contain sm:max-h-[60svh]"
           />
         </AnimatePresence>
         <div className="mt-5 flex items-center justify-between gap-4">
@@ -127,7 +128,11 @@ function CardModal({ list, index, onClose, onMove }: { list: Card[]; index: numb
           </div>
           <button onClick={() => onMove(1)} aria-label="Siguiente" className="rounded-full border border-border px-4 py-2 text-wine hover:bg-muted">→</button>
         </div>
-        <button onClick={onClose} aria-label="Cerrar" className="absolute right-4 top-4 h-9 w-9 rounded-full bg-muted text-ink">✕</button>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button onClick={() => onToggleSelection(card.id)} aria-pressed={selectedIds.includes(card.id)} className="min-h-12 rounded-full border border-wine/25 px-4 text-sm font-semibold text-wine">{selectedIds.includes(card.id) ? "Quitar guardada" : "Guardar tarjeta"}</button>
+          <a href={whatsappUrl(`Hola Yaritza, me interesa la tarjeta: ${card.name}`)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-wine px-3 text-center text-xs font-semibold text-white sm:text-sm"><MessageCircle aria-hidden className="h-4 w-4" />Pedir por WhatsApp</a>
+        </div>
+        <button onClick={onClose} aria-label="Cerrar" className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-ink">✕</button>
       </motion.div>
     </motion.div>
   );
@@ -158,7 +163,7 @@ export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: {
           <input value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(12); }} placeholder="Buscar diseño por nombre" className="w-full bg-transparent outline-none placeholder:text-muted-foreground" />
         </label>
       </div>
-      <motion.div layout className="mx-auto mt-12 grid max-w-7xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+      <motion.div layout className="mx-auto mt-12 grid max-w-7xl grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4">
         <AnimatePresence mode="popLayout">
           {visible.map((c, i) => <GiftCard key={c.id} card={c} onOpen={() => setOpen(i)} selected={selectedIds.includes(c.id)} onToggleSelection={() => onToggleSelection(c.id)} />)}
         </AnimatePresence>
@@ -166,7 +171,7 @@ export function Catalog({ filter, setFilter, selectedIds, onToggleSelection }: {
       {visibleCount < list.length && <div className="mt-10 text-center"><button onClick={() => setVisibleCount((count) => count + 12)} className="min-h-12 rounded-full border border-wine/30 px-7 text-sm font-semibold text-wine transition-colors hover:bg-wine hover:text-white">Ver más diseños</button></div>}
       <AnimatePresence>
         {open !== null && (
-          <CardModal list={list} index={open} onClose={() => setOpen(null)} onMove={(d) => setOpen((o) => ((o ?? 0) + d + list.length) % list.length)} />
+          <CardModal list={list} index={open} onClose={() => setOpen(null)} onMove={(d) => setOpen((o) => ((o ?? 0) + d + list.length) % list.length)} selectedIds={selectedIds} onToggleSelection={onToggleSelection} />
         )}
       </AnimatePresence>
     </section>
