@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Instagram, Mail, MessageCircle, Sparkles, X } from "lucide-react";
 import type { Card } from "@/data/cards";
 import { buildWhatsAppMessage, CATALOG_COPY, EMAIL, INSTAGRAM, INSTAGRAM_SECONDARY, whatsappUrl } from "@/config/contact";
-import { Reveal, SectionDivider } from "../decor/BrandExperience";
+import { HollyBranch, Reveal, SectionDivider } from "../decor/BrandExperience";
 
 export function ContactSection({ cards, onRemove, onSelection }: { cards: Card[]; onRemove: (id: string) => void; onSelection: () => void }) {
   const [notice, setNotice] = useState("");
@@ -30,8 +30,8 @@ export function ContactSection({ cards, onRemove, onSelection }: { cards: Card[]
 
   return (
     <section id="contacto" className="contact-section">
-      <div className="contact-holly contact-holly-left" aria-hidden="true">❧</div>
-      <div className="contact-holly contact-holly-right" aria-hidden="true">❧</div>
+      <HollyBranch className="contact-holly contact-holly-left" />
+      <HollyBranch className="contact-holly contact-holly-right" />
       <div className="contact-inner">
         <Reveal className="selection-summary">
           <div className="selection-heading">
