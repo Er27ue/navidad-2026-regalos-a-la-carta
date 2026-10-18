@@ -1,5 +1,5 @@
 /** Datos de contacto y textos editoriales del catálogo. */
-export const WHATSAPP_NUMBER = "18296491680";
+export const WHATSAPP_NUMBER = "18097561978";
 export const EMAIL = "[CORREO]";
 export const INSTAGRAM = "yaritzamaderacreations";
 export const INSTAGRAM_SECONDARY = "mamaandariega";
