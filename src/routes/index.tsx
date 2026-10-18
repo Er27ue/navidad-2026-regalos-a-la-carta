@@ -5,7 +5,9 @@ import Lenis from "lenis";
 import { Hero } from "@/components/intro/Hero";
 import { AboutYaritza, ThankYou, Welcome } from "@/components/sections/Story";
 import { Catalog, StartChoice, type Filter } from "@/components/cards/Catalog";
-import { BottomBar, ContactSection, TopBar } from "@/components/layout/Navigation";
+import { BottomBar, ContactSection, SelectionPanel, TopBar } from "@/components/layout/Navigation";
+import { cards } from "@/data/cards";
+import { useSelection } from "@/hooks/useSelection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,6 +25,9 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [filter, setFilter] = useState<Filter>("todas");
+  const [selectionOpen, setSelectionOpen] = useState(false);
+  const { selectedIds, toggle, remove } = useSelection();
+  const selectedCards = cards.filter((card) => selectedIds.includes(card.id));
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -48,17 +53,18 @@ function Index() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <TopBar />
+      <TopBar count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
       <main className="overflow-x-clip pb-20 pt-0 md:pb-0 md:pt-14">
         <Hero />
         <Welcome />
         <AboutYaritza />
         <StartChoice onPick={pick} />
-        <Catalog filter={filter} setFilter={setFilter} />
+        <Catalog filter={filter} setFilter={setFilter} selectedIds={selectedIds} onToggleSelection={toggle} />
         <ContactSection />
         <ThankYou />
       </main>
-      <BottomBar />
+      <BottomBar count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
+      {selectionOpen && <SelectionPanel cards={selectedCards} onRemove={remove} onClose={() => setSelectionOpen(false)} />}
     </MotionConfig>
   );
 }
