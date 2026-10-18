@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Cluster, EASE, FallingSnow, Gift, Sparkle } from "../decor/Decor";
+import { whatsappUrl } from "@/config/contact";
 
 function Loader() {
   return (
@@ -34,7 +35,7 @@ export function Hero() {
   return (
     <>
       <AnimatePresence>{!ready && <Loader />}</AnimatePresence>
-      <section ref={ref} className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+      <section id="inicio" ref={ref} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden px-5 py-20">
         <FallingSnow />
         {ready && (
           <motion.div style={{ opacity: fade }} aria-hidden className="pointer-events-none absolute inset-0">
@@ -55,7 +56,7 @@ export function Hero() {
               initial={{ clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}
               transition={{ duration: 1.6, ease: EASE, delay: 0.3 }}
-              className="px-4 font-script text-8xl leading-none text-wine md:text-[10rem]"
+              className="px-4 font-script text-7xl leading-none text-wine sm:text-8xl md:text-[10rem]"
             >
               Catálogo
             </motion.h1>
@@ -78,12 +79,20 @@ export function Hero() {
                 </motion.div>
               ))}
             </motion.div>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="#catalogo" className="inline-flex min-h-12 items-center justify-center rounded-full bg-wine px-8 text-sm font-semibold text-white shadow-soft transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wine">
+                Ver catálogo
+              </a>
+              <a href={whatsappUrl("Hola Yaritza, quiero elegir tarjetas de regalo navideñas.")} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center rounded-full border border-wine/35 bg-cream/70 px-8 text-sm font-semibold text-wine transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-wine">
+                Contactar
+              </a>
+            </div>
           </motion.div>
         )}
 
         {ready && (
           <motion.a
-            href="#bienvenida"
+            href="#catalogo"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2.6 }}
