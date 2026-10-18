@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Instagram, Mail, MessageCircle, Sparkles, X } from "lucide-react";
 import type { Card } from "@/data/cards";
-import { EMAIL, INSTAGRAM, whatsappUrl } from "@/config/contact";
+import { EMAIL, INSTAGRAM, INSTAGRAM_SECONDARY, whatsappUrl } from "@/config/contact";
 
 const requestMessage = "Hola Yaritza, quiero elegir tarjetas de regalo navideñas.";
 
@@ -16,12 +16,15 @@ export function ContactSection() {
         <p className="eyebrow text-[10px] text-white/75">Para tu tienda y tus regalos</p>
         <h2 className="mt-3 font-script text-6xl md:text-7xl">¿Listo para elegir?</h2>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-white/85 md:text-base">Escríbenos y te ayudamos a elegir los diseños para tu tienda.</p>
-        <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+        <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <a href={whatsappUrl(requestMessage)} target="_blank" rel="noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-5 py-4 text-sm font-semibold text-wine transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
             <MessageCircle aria-hidden className="h-5 w-5" /> WhatsApp
           </a>
           <a href={`https://instagram.com/${INSTAGRAM}`} target="_blank" rel="noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/45 px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
             <Instagram aria-hidden className="h-5 w-5" /> Instagram
+          </a>
+          <a href={`https://instagram.com/${INSTAGRAM_SECONDARY}`} target="_blank" rel="noreferrer" aria-label={`Instagram @${INSTAGRAM_SECONDARY}`} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/45 px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+            <Instagram aria-hidden className="h-5 w-5" /> @mamaandariega
           </a>
           {emailReady ? (
             <a href={`mailto:${EMAIL}`} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/45 px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
