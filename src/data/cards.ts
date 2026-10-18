@@ -21,7 +21,7 @@ export const categories: { id: CategoryId; label: string; blurb: string; cover: 
 ];
 
 // [number, name, category] — image lives at /public/cards/NNN.jpg
-const raw: [number, string, CategoryId][] = [
+const raw: [number, string, CategoryId | "decoracion"][] = [
   [1, "Inicial P", "iniciales"], [2, "Inicial B", "iniciales"], [3, "Inicial I", "iniciales"],
   [4, "Inicial N", "iniciales"], [5, "Inicial K", "iniciales"], [6, "Inicial T", "iniciales"],
   [7, "Inicial F", "iniciales"], [8, "Inicial Y", "iniciales"], [9, "Inicial M", "iniciales"],
@@ -59,7 +59,7 @@ const raw: [number, string, CategoryId][] = [
   [103, "Esferas colgantes", "decoracion"], [104, "Happy Holidays", "frases"],
 ];
 
-function assignCategory(name: string, original: CategoryId): CategoryId {
+function assignCategory(name: string, original: CategoryId | "decoracion"): CategoryId {
   const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   if (original === "iniciales" || original === "frases" || original === "nacimiento") return original;
   if (/gnomo|duende/.test(normalized)) return "gnomos";
