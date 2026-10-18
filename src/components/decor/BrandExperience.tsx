@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CATALOG_COPY } from "@/config/contact";
 
-export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+export function Reveal({ children, className = "", delay = 0, variant = "lift" }: { children: ReactNode; className?: string; delay?: number; variant?: "lift" | "pop" }) {
   const element = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -20,7 +20,7 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
     return () => observer.disconnect();
   }, []);
 
-  return <div ref={element} data-revealed={visible} style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties} className={`reveal ${className}`}>{children}</div>;
+  return <div ref={element} data-revealed={visible} data-reveal={variant} style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties} className={`reveal ${className}`}>{children}</div>;
 }
 
 export function Marquee() {
@@ -46,6 +46,10 @@ export function FloatingBadge({ icon, children, className = "" }: { icon: ReactN
 }
 
 export function SectionDivider() {
-  return <div className="section-bow" aria-hidden="true"><span /><svg viewBox="0 0 36 28"><path d="M18 13C13 6 4 4 4 10c0 5 7 6 14 3 7 3 14 2 14-3 0-6-9-4-14 3Zm0 0-5 12m5-12 6 12" /></svg><span /></div>;
+  return <div className="section-bow" aria-hidden="true"><svg viewBox="0 0 36 28"><path d="M18 13C13 6 4 4 4 10c0 5 7 6 14 3 7 3 14 2 14-3 0-6-9-4-14 3Zm0 0-5 12m5-12 6 12" /></svg></div>;
+}
+
+export function HollyBranch({ className = "" }: { className?: string }) {
+  return <svg aria-hidden="true" viewBox="0 0 128 86" className={`holly-branch ${className}`} fill="none"><path d="M5 77C37 54 72 34 121 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /><path d="M32 59c-3-16-17-22-25-17 4 8 11 14 25 17Zm20-15c0-17 11-26 21-23-2 10-8 18-21 23Zm19-11c2 15 14 22 23 17-4-9-11-15-23-17Zm17-9c0-11 8-19 16-17-2 8-7 13-16 17Z" fill="currentColor" /><g fill="#9d3342"><circle cx="47" cy="31" r="4"/><circle cx="55" cy="27" r="3.5"/><circle cx="53" cy="36" r="3"/></g></svg>;
 }
 
