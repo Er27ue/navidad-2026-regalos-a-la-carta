@@ -21,7 +21,7 @@ export function ContactSection() {
             <MessageCircle aria-hidden className="h-5 w-5" /> WhatsApp
           </a>
           <a href={`https://instagram.com/${INSTAGRAM}`} target="_blank" rel="noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/45 px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-            <Instagram aria-hidden className="h-5 w-5" /> Instagram
+            <Instagram aria-hidden className="h-5 w-5" /> @yaritzamaderacreations
           </a>
           <a href={`https://instagram.com/${INSTAGRAM_SECONDARY}`} target="_blank" rel="noreferrer" aria-label={`Instagram @${INSTAGRAM_SECONDARY}`} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/45 px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
             <Instagram aria-hidden className="h-5 w-5" /> @mamaandariega
