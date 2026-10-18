@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MotionConfig } from "framer-motion";
-import { useEffect, useState } from "react";
-import Lenis from "lenis";
+import { useState } from "react";
 import { Hero } from "@/components/intro/Hero";
 import { AboutYaritza, ThankYou, Welcome } from "@/components/sections/Story";
 import { Catalog, StartChoice, type Filter } from "@/components/cards/Catalog";
@@ -29,26 +28,10 @@ function Index() {
   const { selectedIds, toggle, remove } = useSelection();
   const selectedCards = cards.filter((card) => selectedIds.includes(card.id));
 
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const lenis = new Lenis({ lerp: 0.09 });
-    let id = 0;
-    const raf = (t: number) => { lenis.raf(t); id = requestAnimationFrame(raf); };
-    id = requestAnimationFrame(raf);
-    const onClick = (e: MouseEvent) => {
-      const a = (e.target as HTMLElement).closest('a[href^="#"]');
-      if (a) { e.preventDefault(); lenis.scrollTo(a.getAttribute("href")!, { offset: -76 }); }
-    };
-    document.addEventListener("click", onClick);
-    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
-    return () => { cancelAnimationFrame(id); lenis.destroy(); document.removeEventListener("click", onClick); };
-  }, []);
-
   const pick = (f: Filter) => {
     setFilter(f);
-    const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-    if (lenis) lenis.scrollTo("#catalogo", { offset: -76 });
-    else document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("catalogo")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
@@ -60,7 +43,7 @@ function Index() {
         <AboutYaritza />
         <StartChoice onPick={pick} />
         <Catalog filter={filter} setFilter={setFilter} selectedIds={selectedIds} onToggleSelection={toggle} />
-        <ContactSection />
+        <ContactSection count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
         <ThankYou />
       </main>
       <BottomBar count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
@@ -68,3 +51,4 @@ function Index() {
     </MotionConfig>
   );
 }
+

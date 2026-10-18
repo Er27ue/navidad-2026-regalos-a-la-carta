@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "navidad-2026-regalos-a-la-carta",
+  "compatibility_date": "2026-10-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/server.ts",
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  }
+}

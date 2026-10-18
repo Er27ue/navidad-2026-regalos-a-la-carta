@@ -146,22 +146,39 @@ export function FallingSnow({ count = 18 }: { count?: number }) {
   );
 }
 
-/** A cluster used in corners: pine + berries + poinsettia. */
-export function Cluster({ delay = 0, flip = "", className }: { delay?: number; flip?: string; className?: string }) {
+/** An asymmetrical leafy bough, anchored at its top and swaying gently. */
+export function Cluster({ flip = "", className }: { delay?: number; flip?: string; className?: string }) {
+  const leaves = [
+    [31, 24, -48], [47, 35, 38], [58, 51, -46], [77, 63, 40], [88, 82, -42],
+    [111, 96, 48], [124, 112, -38], [147, 128, 42], [166, 144, -36], [185, 156, 44],
+    [55, 62, -105], [102, 91, 115], [140, 126, -105], [174, 150, 110],
+  ];
   return (
-    <div className={`relative h-64 w-64 md:h-80 md:w-80 ${className ?? ""}`} style={{ transform: flip }}>
-      <Sway duration={8.3} deg={3} className="absolute left-4 top-0 w-24 md:w-28" style={{ rotate: "-35deg" }}>
-        <Pine delay={delay} />
-      </Sway>
-      <Sway duration={6.7} deg={4} className="absolute left-24 top-0 w-20 md:w-24" style={{ rotate: "-10deg" }}>
-        <BerryBranch delay={delay + 0.3} />
-      </Sway>
-      <Sway duration={9.4} deg={2} origin="50% 50%" className="absolute left-0 top-28 w-24 md:w-28">
-        <Poinsettia delay={delay + 0.6} />
-      </Sway>
-      <Sway duration={7.6} deg={3} className="absolute left-40 top-0 w-16 md:w-20" style={{ rotate: "20deg" }}>
-        <Pine delay={delay + 0.5} />
+    <div className={`relative aspect-[1.35/1] w-full ${className ?? ""}`} style={{ transform: flip }}>
+      <Sway duration={10.5} deg={1.4} origin="8% 0%" className="h-full w-full">
+        <svg viewBox="0 0 220 170" className="h-full w-full overflow-visible" aria-hidden="true">
+          <path d="M5 -8 C17 17 31 29 48 43 C70 60 79 78 99 91 C122 107 135 125 158 137 C180 149 194 157 219 166" fill="none" stroke="var(--pine)" strokeWidth="3.2" strokeLinecap="round" />
+          <path d="M41 39 C35 25 29 15 21 8 M72 63 C82 48 89 37 91 24 M105 95 C97 79 92 69 94 58 M145 129 C158 113 167 101 171 88 M179 151 C173 136 173 126 179 117" fill="none" stroke="var(--pine)" strokeWidth="2.2" strokeLinecap="round" />
+          {leaves.map(([x, y, angle], index) => (
+            <path
+              key={index}
+              d="M0 0 C7 -11 21 -12 29 -3 C20 6 8 7 0 0Z"
+              transform={`translate(${x} ${y}) rotate(${angle})`}
+              fill={index % 3 === 0 ? "var(--olive)" : "var(--pine)"}
+              opacity={index % 2 === 0 ? 0.78 : 0.9}
+            />
+          ))}
+          <g fill="var(--berry)">
+            <circle cx="74" cy="47" r="4" /><circle cx="82" cy="43" r="3.5" /><circle cx="80" cy="52" r="3" />
+            <circle cx="154" cy="107" r="4" /><circle cx="163" cy="104" r="3.5" /><circle cx="160" cy="114" r="3" />
+          </g>
+          <g transform="translate(118 104) rotate(24)" fill="none" stroke="#bd9250" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M0 0 C-10 -13 -22 -11 -18 -3 C-15 2 -7 2 0 0 C10 -13 22 -11 18 -3 C15 2 7 2 0 0Z" />
+            <path d="M0 0 L-5 12 M2 0 L8 12" />
+          </g>
+        </svg>
       </Sway>
     </div>
   );
 }
+
