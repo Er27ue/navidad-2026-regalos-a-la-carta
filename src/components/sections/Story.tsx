@@ -6,9 +6,9 @@ export function Welcome() {
   return (
     <section id="bienvenida" className="artist-section">
       <div className="artist-layout">
-        <Reveal className="artist-portrait-wrap">
+        <Reveal className="artist-portrait-wrap" variant="pop">
           <BrushBackdrop />
-          <img className="artist-portrait" src="/yaritza-madera.webp" alt="Yaritza Madera, artista e ilustradora de las tarjetas navideñas" width="900" height="1600" fetchPriority="high" />
+          <img className="artist-portrait" src="/yaritza-madera.svg" alt="Yaritza Madera, artista e ilustradora de las tarjetas navideñas" width="640" height="1138" fetchPriority="high" />
           <FloatingBadge icon={<span className="badge-medal">20</span>} className="badge-years">{CATALOG_COPY.artistBadgeYears}</FloatingBadge>
           <FloatingBadge icon={<Brush size={16} />} className="badge-artist">{CATALOG_COPY.artistBadgeRole}</FloatingBadge>
         </Reveal>
