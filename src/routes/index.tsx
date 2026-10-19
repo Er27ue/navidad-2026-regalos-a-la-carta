@@ -8,6 +8,7 @@ import { Marquee } from "@/components/decor/BrandExperience";
 import { BottomBar, ContactSection, SelectionPanel, TopBar } from "@/components/layout/Navigation";
 import { cards } from "@/data/cards";
 import { useSelection } from "@/hooks/useSelection";
+import { useOrder } from "@/hooks/useOrder";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,22 +27,23 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [filter, setFilter] = useState<Filter>("todas");
   const [selectionOpen, setSelectionOpen] = useState(false);
-  const { selectedIds, toggle, remove } = useSelection();
-  const selectedCards = cards.filter((card) => selectedIds.includes(card.id));
+  const { selectedIds, toggle } = useSelection();
+  const { quantities, setQuantity, remove, total } = useOrder();
+  const orderItems = cards.filter((card) => quantities[card.id] > 0).map((card) => ({ card, quantity: quantities[card.id] }));
 
   return (
     <MotionConfig reducedMotion="user">
-      <TopBar count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
+      <TopBar count={total} onSelection={() => setSelectionOpen(true)} />
       <main className="overflow-x-clip pb-20 pt-0 md:pb-0 md:pt-14">
         <Hero />
         <Welcome />
         <Marquee />
-        <Catalog filter={filter} setFilter={setFilter} selectedIds={selectedIds} onToggleSelection={toggle} />
-        <ContactSection cards={selectedCards} onRemove={remove} onSelection={() => setSelectionOpen(true)} />
+        <Catalog filter={filter} setFilter={setFilter} favoriteIds={selectedIds} onToggleFavorite={toggle} quantities={quantities} onQuantity={setQuantity} />
+        <ContactSection items={orderItems} onQuantity={setQuantity} onRemove={remove} onSelection={() => setSelectionOpen(true)} />
         <ThankYou />
       </main>
-      <BottomBar count={selectedIds.length} onSelection={() => setSelectionOpen(true)} />
-      {selectionOpen && <SelectionPanel cards={selectedCards} onRemove={remove} onClose={() => setSelectionOpen(false)} />}
+      <BottomBar count={total} onSelection={() => setSelectionOpen(true)} />
+      {selectionOpen && <SelectionPanel items={orderItems} onQuantity={setQuantity} onRemove={remove} onClose={() => setSelectionOpen(false)} />}
     </MotionConfig>
   );
 }
