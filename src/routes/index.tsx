@@ -29,7 +29,7 @@ function Index() {
   const [selectionOpen, setSelectionOpen] = useState(false);
   const { selectedIds, toggle } = useSelection();
   const { quantities, setQuantity, remove, total } = useOrder();
-  const orderItems = cards.filter((card) => quantities[card.id] > 0).map((card) => ({ card, quantity: quantities[card.id] }));
+  const orderItems = cards.flatMap((card) => { const quantity = quantities[card.id] ?? 0; return quantity > 0 ? [{ card, quantity }] : []; });
 
   return (
     <MotionConfig reducedMotion="user">
