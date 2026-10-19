@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { cards } from "@/data/cards";
-import { buildWhatsAppMessage, CATALOG_COPY, whatsappUrl } from "@/config/contact";
+import { whatsappUrl } from "@/config/contact";
 import { Cluster } from "../decor/Decor";
 import { Reveal, SparkleLayer } from "../decor/BrandExperience";
 
@@ -14,9 +14,9 @@ export function Hero() {
       <SparkleLayer />
       <div className="hero-content">
         <Reveal className="hero-copy">
-          <p className="eyebrow hero-eyebrow">{CATALOG_COPY.heroEyebrow}</p>
-          <h1 className="hero-title"><span className="sr-only">{CATALOG_COPY.title}</span><span aria-hidden="true">{[...CATALOG_COPY.title].map((letter, index) => <span className="hero-letter" style={{ animationDelay: `${index * 85}ms` }} key={`${letter}-${index}`}>{letter}</span>)}</span></h1>
-          <p className="hero-subtitle">{CATALOG_COPY.subtitle}</p>
+          <p className="eyebrow hero-eyebrow">Yaritza Madera Creations presenta</p>
+          <h1 className="hero-title"><span className="sr-only">Catálogo</span><span aria-hidden="true">{[..."Catálogo"].map((letter, index) => <span className="hero-letter" style={{ animationDelay: `${index * 85}ms` }} key={`${letter}-${index}`}>{letter}</span>)}</span></h1>
+          <p className="hero-subtitle">Tarjetas de regalo · Navidad 2026</p>
         </Reveal>
         <Reveal delay={120}>
           <div className="card-fan" aria-label="Una muestra de tarjetas del catálogo">
@@ -25,10 +25,9 @@ export function Hero() {
         </Reveal>
         <Reveal delay={240} className="hero-actions">
           <a href="#catalogo" className="button button-primary">Ver catálogo</a>
-          <a href={whatsappUrl(buildWhatsAppMessage([]))} target="_blank" rel="noopener noreferrer" className="button button-outline"><MessageCircle aria-hidden="true" size={18} /> Consultar</a>
+          <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className="button button-outline"><MessageCircle aria-hidden="true" size={18} /> Consultar</a>
         </Reveal>
       </div>
     </section>
   );
 }
-

@@ -1,4 +1,4 @@
-import { Brush, Sparkles } from "lucide-react";
+import { Brush } from "lucide-react";
 import { CATALOG_COPY, INSTAGRAM } from "@/config/contact";
 import { BrushBackdrop, FloatingBadge, Reveal } from "../decor/BrandExperience";
 
@@ -13,11 +13,10 @@ export function Welcome() {
           <FloatingBadge icon={<Brush size={16} />} className="badge-artist">{CATALOG_COPY.artistBadgeRole}</FloatingBadge>
         </Reveal>
         <div className="artist-copy">
-          <Reveal><p className="eyebrow artist-eyebrow">@{INSTAGRAM}</p></Reveal>
-          <Reveal delay={120}><h2 className="artist-greeting">{CATALOG_COPY.greeting}</h2></Reveal>
-          <Reveal delay={240}><p className="artist-welcome">{CATALOG_COPY.welcome}</p></Reveal>
-          <Reveal delay={360}><p className="artist-signature">{CATALOG_COPY.signature}</p></Reveal>
-          <Reveal delay={480}><span className="artist-sparkle" aria-hidden="true"><Sparkles size={20} /></span></Reveal>
+          <Reveal><h2 className="artist-greeting">{CATALOG_COPY.greeting}</h2></Reveal>
+          <Reveal delay={100}><p className="artist-welcome">{CATALOG_COPY.welcome}</p></Reveal>
+          <Reveal delay={180}><p className="artist-signature">{CATALOG_COPY.signature}</p></Reveal>
+          <Reveal delay={240}><a className="artist-eyebrow" href={`https://instagram.com/${INSTAGRAM}`} target="_blank" rel="noopener noreferrer">@{INSTAGRAM}</a></Reveal>
         </div>
       </div>
     </section>
@@ -25,11 +24,5 @@ export function Welcome() {
 }
 
 export function ThankYou() {
-  return (
-    <footer id="gracias" className="site-footer">
-      <p>Gracias por elegirnos y acompañar nuestro trabajo.</p>
-      <a href={`https://instagram.com/${INSTAGRAM}`} target="_blank" rel="noopener noreferrer">@{INSTAGRAM}</a>
-    </footer>
-  );
+  return <footer id="gracias" className="site-footer"><p>Gracias por elegirnos y acompañar nuestro trabajo.</p></footer>;
 }
-

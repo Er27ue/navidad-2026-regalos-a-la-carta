@@ -34,14 +34,23 @@ export const CATALOG_COPY = {
 
 const hasWhatsAppNumber = /^\d{8,15}$/.test(WHATSAPP_NUMBER);
 
-export function buildWhatsAppMessage(names: string[]) {
-  const uniqueNames = [...new Set(names)];
-  if (!uniqueNames.length) return CATALOG_COPY.noSelection;
-  return `${CATALOG_COPY.withSelection}\n${uniqueNames.map((name, index) => `${index + 1}. ${name}`).join("\n")}\n\n${CATALOG_COPY.countLabel}: ${uniqueNames.length}.`;
+export type OrderMessageItem = { name: string; quantity: number };
+
+export function createOrderCode() {
+  const date = new Date();
+  const monthDay = `${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+  const suffix = Math.random().toString(36).slice(2, 4).toUpperCase().padEnd(2, "X");
+  return `PED-${monthDay}-${suffix}`;
 }
 
-export function whatsappUrl(message: string) {
+export function buildOrderMessage(items: OrderMessageItem[], code = createOrderCode()) {
+  const lines = items.filter((item) => item.quantity > 0);
+  if (!lines.length) return "";
+  const total = lines.reduce((sum, item) => sum + item.quantity, 0);
+  return `Hola Yaritza, quisiera hacer este pedido (${code}):\n\n${lines.map((item) => `• ${item.name} × ${item.quantity}`).join("\n")}\n\nTotal: ${total} tarjetas\nGracias.`;
+}
+
+export function whatsappUrl(message?: string) {
   const number = hasWhatsAppNumber ? WHATSAPP_NUMBER : "";
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  return message ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/${number}`;
 }
-
