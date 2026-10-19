@@ -64,7 +64,7 @@ export function ContactSection({ items, onRemove, onQuantity, onSelection }: { i
           <a href={`https://ig.me/m/${INSTAGRAM}`} onClick={()=>void copyForInstagram()} target="_blank" rel="noopener noreferrer" className="button button-translucent"><Instagram aria-hidden="true" size={18} /> {CATALOG_COPY.instagramButton}</a>
         </div>
         <p className="contact-notice" aria-live="polite">{notice}</p>
-        <div className="contact-links"><a href={`https://instagram.com/${INSTAGRAM}`} target="_blank" rel="noopener noreferrer">@{INSTAGRAM}</a><a href={`https://instagram.com/${INSTAGRAM_SECONDARY}`} target="_blank" rel="noopener noreferrer">@{INSTAGRAM_SECONDARY}</a>{emailReady && <a href={`mailto:${EMAIL}`}>Correo</a>}</div>
+        <div className="contact-links"><a href={`https://instagram.com/${INSTAGRAM_SECONDARY}`} target="_blank" rel="noopener noreferrer">@{INSTAGRAM_SECONDARY}</a>{emailReady && <a href={`mailto:${EMAIL}`}>Correo</a>}</div>
       </Reveal>
     </div>
   </section>;
