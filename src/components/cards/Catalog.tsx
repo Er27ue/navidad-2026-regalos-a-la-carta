@@ -1,113 +1,541 @@
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Heart, MessageCircle, Plus, Search } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Minus, Plus, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { cards, categories, type Card } from "@/data/cards";
-import { EASE } from "../decor/Decor";
-import { createOrderCode, buildOrderMessage, CATALOG_COPY, whatsappUrl } from "@/config/contact";
+import { CATEGORY_NAMES, CATEGORY_ORDER } from "@/config/contact";
+import { cards, categories, type Card, type CategoryId } from "@/data/cards";
+import { Reveal } from "../decor/BrandExperience";
 
 export type Filter = "todas" | "letras" | "personajes" | "frases" | "ilustraciones";
-const filterOptions: { id: Filter; label: string }[] = [
-  { id: "todas", label: "Todas" }, { id: "letras", label: "Letras" },
-  { id: "personajes", label: "Personajes" }, { id: "frases", label: "Frases" },
+const options: { id: Filter; label: string }[] = [
+  { id: "todas", label: "Todas" },
+  { id: "letras", label: "Letras" },
+  { id: "personajes", label: "Personajes" },
+  { id: "frases", label: "Frases" },
   { id: "ilustraciones", label: "Ilustraciones" },
 ];
-const matchesFilter = (card: Card, filter: Filter) => {
-  if (filter === "todas") return true;
-  if (filter === "letras") return card.category === "iniciales";
-  if (filter === "frases") return card.category === "frases";
-  if (filter === "personajes") return ["santa", "gnomos", "animales"].includes(card.category);
-  return ["nacimiento", "florales", "puertas", "detalles"].includes(card.category);
-};
+const normalize = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase();
+const isPerson = (card: Card) => ["santa", "gnomos", "animales"].includes(card.category);
+const isIllustration = (card: Card) =>
+  ["nacimiento", "florales", "puertas", "detalles"].includes(card.category);
+const matches = (card: Card, filter: Filter) =>
+  filter === "todas" ||
+  (filter === "letras" && card.category === "iniciales") ||
+  (filter === "frases" && card.category === "frases") ||
+  (filter === "personajes" && isPerson(card)) ||
+  (filter === "ilustraciones" && isIllustration(card));
+const countsFor = (list: Card[]) =>
+  Object.fromEntries(
+    options.map(({ id }) => [
+      id,
+      id === "todas" ? list.length : list.filter((card) => matches(card, id)).length,
+    ]),
+  ) as Record<Filter, number>;
+const categoryLabel = (category: CategoryId) => CATEGORY_NAMES[category];
 
-function CategoryFilter({ value, onChange, counts }: { value: Filter; onChange: (f: Filter) => void; counts: Record<Filter, number> }) {
-  return <LayoutGroup><div role="group" aria-label="Filtrar por categoría" className="category-filter">
-    {filterOptions.map((o) => <button type="button" key={o.id} aria-pressed={value === o.id} onClick={() => onChange(o.id)} className="category-chip">
-      {value === o.id && <motion.span layoutId="pill" className="absolute inset-0 rounded-full bg-wine" transition={{ type: "spring", stiffness: 260, damping: 28 }} />}
-      <span className={`relative ${value === o.id ? "text-primary-foreground" : "text-ink"}`}>{o.label} ({counts[o.id]})</span>
-    </button>)}
-  </div></LayoutGroup>;
+function orderAll(list: Card[]) {
+  const groups = new Map<CategoryId, Card[]>();
+  for (const card of [...list].sort((a, b) => a.order - b.order))
+    groups.set(card.category, [...(groups.get(card.category) ?? []), card]);
+  const result: Card[] = [];
+  let round = 0;
+  while (result.length < list.length) {
+    for (const category of [...CATEGORY_ORDER.slice(1), CATEGORY_ORDER[0]!]) {
+      const card = groups.get(category)?.[round];
+      if (card) result.push(card);
+    }
+    round++;
+  }
+  return result;
 }
 
-function GiftCard({ card, favorite, quantity, onOpen, onToggleFavorite, onQuantity }: { card: Card; favorite: boolean; quantity: number; onOpen: () => void; onToggleFavorite: () => void; onQuantity: (n: number) => void }) {
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(quantity || 1);
-  const showPicker = () => { setDraft(quantity || 1); setOpen((value) => !value); };
-  return <motion.article layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.32, ease: EASE }} whileHover={{ y: -3 }} className="gift-card group relative overflow-visible rounded-2xl bg-card shadow-soft">
-    <button type="button" onClick={onOpen} aria-label={`Ver tarjeta ${card.name} en grande`} className="flex w-full flex-col overflow-hidden rounded-2xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wine">
-      <motion.div layoutId={`img-${card.id}`} className="aspect-[4/3] overflow-hidden bg-white">
-        <img src={card.image} alt={card.name} width="640" height="480" loading="lazy" decoding="async" className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]" />
-      </motion.div>
-      <div className="w-full border-t border-border px-3 py-3 sm:px-4">
-        <p className="truncate text-sm font-medium text-ink">{card.name}</p>
-        <p className="text-[10px] uppercase tracking-[0.16em] text-olive">{categories.find((c) => c.id === card.category)?.label}</p>
-      </div>
-    </button>
-    <div className="card-order-actions">
-      <button type="button" onClick={onToggleFavorite} aria-pressed={favorite} aria-label={favorite ? `Quitar ${card.name} de favoritos` : `Guardar ${card.name} en favoritos`} className={`favorite-button ${favorite ? "is-favorite" : ""}`}><Heart aria-hidden className={favorite ? "fill-current favorite-bounce" : ""} size={19} /></button>
-      <button type="button" onClick={showPicker} aria-expanded={open} aria-label={`Añadir ${card.name} al pedido`} className="add-order-button"><Plus aria-hidden size={19} />{quantity > 0 && <span>{quantity}</span>}</button>
+function QtyControl({
+  value,
+  label,
+  onChange,
+}: {
+  value: number;
+  label: string;
+  onChange: (value: number) => void;
+}) {
+  const commit = (raw: string) =>
+    onChange(raw.trim() === "" ? 0 : Math.max(0, Math.min(999, Number.parseInt(raw, 10) || 0)));
+  return (
+    <div
+      className="card-qty"
+      aria-label={`Cantidad de ${label}`}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        type="button"
+        aria-label={`Restar ${label}`}
+        onClick={() => onChange(Math.max(0, value - 1))}
+      >
+        <Minus size={15} />
+      </button>
+      {value === 0 ? (
+        <button
+          type="button"
+          className="qty-add"
+          aria-label={`Añadir ${label} al pedido`}
+          onClick={() => onChange(1)}
+        >
+          <Plus size={16} /> Añadir
+        </button>
+      ) : (
+        <input
+          type="number"
+          inputMode="numeric"
+          min="0"
+          max="999"
+          aria-label={`Unidades de ${label}`}
+          value={value}
+          onFocus={(event) => event.currentTarget.select()}
+          onChange={(event) => commit(event.target.value)}
+        />
+      )}
+      <button
+        type="button"
+        aria-label={`Sumar ${label}`}
+        onClick={() => onChange(Math.min(999, value + 1))}
+      >
+        <Plus size={15} />
+      </button>
     </div>
-    {open && <div className="quantity-picker" role="group" aria-label={`Cantidad de ${card.name}`}>
-      <p>Unidades de esta tarjeta</p>
-      <div className="quantity-quick">{[1,5,10,15,20].map((n) => <button key={n} type="button" onClick={() => { onQuantity(n); setOpen(false); }}>{n}</button>)}</div>
-      <div className="quantity-custom"><button type="button" aria-label="Restar una" onClick={() => setDraft((n) => Math.max(1,n-1))}>−</button><output aria-live="polite">{draft}</output><button type="button" aria-label="Sumar una" onClick={() => setDraft((n) => n+1)}>+</button><button type="button" className="quantity-apply" onClick={() => { onQuantity(draft); setOpen(false); }}>Añadir</button></div>
-    </div>}
-  </motion.article>;
+  );
 }
 
-function CardModal({ list, index, onClose, onMove, favoriteIds, onToggleFavorite, onQuantity }: { list: Card[]; index: number; onClose: () => void; onMove: (d: number) => void; favoriteIds: string[]; onToggleFavorite: (id: string) => void; onQuantity: (id: string, quantity: number) => void }) {
-  const card = list[index] ?? list[0]!;
+function ProductBack() {
+  return (
+    <div className="product-back" aria-label="Reverso de marca">
+      <span className="reverse-branch">✦</span>
+      <p>Con cariño,</p>
+      <strong>Yaritza Madera</strong>
+      <small>CREATIONS · NAVIDAD 2026</small>
+      <span className="reverse-flower">❧</span>
+    </div>
+  );
+}
+
+function ProductCard({
+  card,
+  quantity,
+  onQuantity,
+  onOpen,
+}: {
+  card: Card;
+  quantity: number;
+  onQuantity: (n: number) => void;
+  onOpen: () => void;
+}) {
+  return (
+    <Reveal className={`product-card ${quantity ? "is-selected" : ""}`}>
+      <button
+        type="button"
+        className="product-preview"
+        onClick={onOpen}
+        aria-label={`Ver frente y reverso de ${card.name}`}
+      >
+        <span className="product-paper" style={{ aspectRatio: `${card.ratio}` }}>
+          <img
+            src={card.thumb}
+            alt={`Frente de la tarjeta ${card.name}`}
+            width="640"
+            height="480"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="product-glint" aria-hidden="true" />
+          {quantity > 0 && <span className="qty-seal">×{quantity}</span>}
+        </span>
+      </button>
+      <div className="product-meta">
+        <span className="product-category">{categoryLabel(card.category)}</span>
+        <h3>{card.name}</h3>
+      </div>
+      <QtyControl value={quantity} label={card.name} onChange={onQuantity} />
+    </Reveal>
+  );
+}
+
+function CategoryMosaics({
+  onChoose,
+  counts,
+}: {
+  onChoose: (filter: Filter) => void;
+  counts: Record<Filter, number>;
+}) {
+  return (
+    <div className="category-mosaics" aria-label="Explorar tipos de tarjetas">
+      {options.slice(1).map(({ id, label }, index) => {
+        const card = [
+          cards.find((item) => item.category === "iniciales"),
+          cards.find((item) => isPerson(item)),
+          cards.find((item) => item.category === "frases"),
+          cards.find((item) => isIllustration(item)),
+        ][index]!;
+        return (
+          <button className="category-mosaic" type="button" key={id} onClick={() => onChoose(id)}>
+            <img src={card.thumb} alt="" loading="lazy" />
+            <span>{label}</span>
+            <small>{counts[id]} diseños</small>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function CategoryOverview({ onChoose }: { onChoose: (filter: Filter) => void }) {
+  return (
+    <section className="category-overview" aria-label="Explora las categorías del catálogo">
+      <p className="category-overview-title">Un detalle para cada estilo</p>
+      <CategoryMosaics onChoose={onChoose} counts={countsFor(cards)} />
+    </section>
+  );
+}
+
+function CardModal({
+  list,
+  index,
+  onClose,
+  onMove,
+  quantity,
+  onQuantity,
+}: {
+  list: Card[];
+  index: number;
+  onClose: () => void;
+  onMove: (n: number) => void;
+  quantity: number;
+  onQuantity: (n: number) => void;
+}) {
+  const [back, setBack] = useState(false);
+  const card = list[index];
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); if (e.key === "ArrowRight") onMove(1); if (e.key === "ArrowLeft") onMove(-1); };
-    window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h);
+    setBack(false);
+  }, [card?.id]);
+  useEffect(() => {
+    const handle = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight") onMove(1);
+      if (event.key === "ArrowLeft") onMove(-1);
+      if (event.key === " " || event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        setBack((value) => !value);
+      }
+    };
+    window.addEventListener("keydown", handle);
+    return () => window.removeEventListener("keydown", handle);
   }, [onClose, onMove]);
-  return <motion.div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-    <div className="absolute inset-0 bg-ink/50 backdrop-blur-sm" onClick={onClose} />
-    <motion.div initial={{ y: 40, scale: .95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 40, scale: .95 }} transition={{ type: "spring", stiffness: 120, damping: 20 }} className="relative max-h-[92svh] w-full overflow-y-auto rounded-t-3xl bg-card p-5 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-lift sm:max-h-[90svh] sm:max-w-lg sm:rounded-3xl sm:p-6">
-      <AnimatePresence mode="wait"><motion.img key={card.id} src={card.image} alt={card.name} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: .35, ease: EASE }} className="mx-auto max-h-[48svh] w-full object-contain sm:max-h-[60svh]" /></AnimatePresence>
-      <div className="mt-5 flex items-center justify-between gap-4"><button onClick={() => onMove(-1)} aria-label="Anterior" className="rounded-full border border-border px-4 py-2 text-wine">←</button><div className="text-center"><p className="font-script text-3xl text-wine">{card.name}</p><p className="text-[10px] uppercase tracking-[.2em] text-olive">{index+1} / {list.length}</p></div><button onClick={() => onMove(1)} aria-label="Siguiente" className="rounded-full border border-border px-4 py-2 text-wine">→</button></div>
-      <div className="mt-4 grid grid-cols-2 gap-2"><button onClick={() => onToggleFavorite(card.id)} className="min-h-12 rounded-full border border-wine/25 px-4 text-sm font-semibold text-wine">{favoriteIds.includes(card.id) ? "Quitar favorito" : "Guardar favorito"}</button><button onClick={() => onQuantity(card.id, 1)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-wine px-3 text-center text-xs font-semibold text-white sm:text-sm"><Plus aria-hidden size={16} />Añadir 1 al pedido</button></div>
-      <button onClick={onClose} aria-label="Cerrar" className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted text-ink">✕</button>
+  if (!card) return null;
+  let startX = 0;
+  return (
+    <motion.div
+      className="card-modal"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onTouchStart={(event) => {
+        startX = event.touches[0]?.clientX ?? 0;
+      }}
+      onTouchEnd={(event) => {
+        const delta = (event.changedTouches[0]?.clientX ?? 0) - startX;
+        if (Math.abs(delta) > 50) onMove(delta < 0 ? 1 : -1);
+      }}
+    >
+      <button className="modal-scrim" onClick={onClose} aria-label="Cerrar vista" />
+      <section
+        className="card-modal-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-card-title"
+      >
+        <button type="button" className="modal-close" onClick={onClose} aria-label="Cerrar">
+          <X />
+        </button>
+        <div className="modal-card-stage">
+          <div className={`modal-card-flipper ${back ? "is-back" : ""}`}>
+            <div className="modal-face modal-front">
+              <img
+                src={card.front}
+                alt={`Frente de la tarjeta ${card.name}`}
+                fetchPriority="high"
+              />
+            </div>
+            <div className="modal-face modal-reverse" aria-hidden={!back}>
+              <ProductBack />
+            </div>
+          </div>
+        </div>
+        <button
+          className="flip-toggle"
+          type="button"
+          aria-pressed={back}
+          onClick={() => setBack((value) => !value)}
+        >
+          {back ? "Ver frente" : "Ver reverso"} <span>● {back ? "○" : "●"}</span>
+        </button>
+        <div className="modal-caption">
+          <button type="button" onClick={() => onMove(-1)} aria-label="Tarjeta anterior">
+            <ChevronLeft />
+          </button>
+          <div>
+            <h2 id="modal-card-title">{card.name}</h2>
+            <p>
+              {categoryLabel(card.category)} · {index + 1} / {list.length}
+            </p>
+          </div>
+          <button type="button" onClick={() => onMove(1)} aria-label="Tarjeta siguiente">
+            <ChevronRight />
+          </button>
+        </div>
+        <div className="modal-packages" aria-label="Cantidades sugeridas">
+          {[5, 10, 15, 20, 50].map((n) => (
+            <button type="button" key={n} onClick={() => onQuantity(n)}>
+              {n}
+            </button>
+          ))}
+        </div>
+        <QtyControl value={quantity} label={card.name} onChange={onQuantity} />
+        <p className="swipe-hint">
+          Desliza para ver otra tarjeta · toca “Ver reverso” para girarla
+        </p>
+      </section>
     </motion.div>
-  </motion.div>;
+  );
 }
 
-export function Catalog({ filter, setFilter, favoriteIds, onToggleFavorite, quantities, onQuantity }: { filter: Filter; setFilter: (f: Filter) => void; favoriteIds: string[]; onToggleFavorite: (id: string) => void; quantities: Record<string, number>; onQuantity: (id: string, quantity: number) => void }) {
-  const [open, setOpen] = useState<number | null>(null);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
+export function Catalog({
+  filter,
+  setFilter,
+  quantities,
+  onQuantity,
+}: {
+  filter: Filter;
+  setFilter: (f: Filter) => void;
+  quantities: Record<string, number>;
+  onQuantity: (id: string, quantity: number) => void;
+}) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [query, setQuery] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : (new URLSearchParams(window.location.search).get("q") ?? ""),
+  );
+  const [letter, setLetter] = useState("");
+  const [page, setPage] = useState(() =>
+    Math.max(
+      1,
+      Number(
+        new URLSearchParams(typeof window === "undefined" ? "" : window.location.search).get("p"),
+      ) || 1,
+    ),
+  );
   const gridRef = useRef<HTMLDivElement>(null);
-  const searched = useMemo(() => cards.filter((card) => !query.trim() || card.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())), [query]);
-  const counts = useMemo(() => ({
-    todas: searched.length,
-    letras: searched.filter((card) => matchesFilter(card, "letras")).length,
-    personajes: searched.filter((card) => matchesFilter(card, "personajes")).length,
-    frases: searched.filter((card) => matchesFilter(card, "frases")).length,
-    ilustraciones: searched.filter((card) => matchesFilter(card, "ilustraciones")).length,
-  }), [searched]);
-  const list = useMemo(() => searched.filter((card) => matchesFilter(card, filter)), [searched, filter]);
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedFilter = params.get("cat");
+      if (
+        ["todas", "letras", "personajes", "frases", "ilustraciones"].includes(requestedFilter ?? "")
+      ) {
+        setFilter(requestedFilter as Filter);
+      } else {
+        setFilter("todas");
+      }
+      setQuery(params.get("q") ?? "");
+      setPage(Math.max(1, Number(params.get("p")) || 1));
+    };
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, [setFilter]);
+  const filteredSearch = useMemo(
+    () => cards.filter((card) => !query.trim() || normalize(card.name).includes(normalize(query))),
+    [query],
+  );
+  const counts = useMemo(() => countsFor(filteredSearch), [filteredSearch]);
+  const list = useMemo(() => {
+    let result = filteredSearch.filter((card) => matches(card, filter));
+    if (filter === "letras") {
+      result.sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+      if (letter)
+        result = result.filter((card) =>
+          normalize(card.name.replace("Inicial ", "")).startsWith(normalize(letter)),
+        );
+    } else if (filter === "todas") result = orderAll(result);
+    return result;
+  }, [filteredSearch, filter, letter]);
   const pageCount = Math.ceil(list.length / 12);
-  const visible = list.slice((page-1)*12, page*12);
-  const changePage = (next: number) => {
+  const safePage = Math.min(page, Math.max(1, pageCount));
+  const visible = list.slice((safePage - 1) * 12, safePage * 12);
+  const movePage = (next: number) => {
     setPage(next);
-    requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    const url = new URL(window.location.href);
+    url.searchParams.set("cat", filter);
+    url.searchParams.set("p", String(next));
+    if (query) url.searchParams.set("q", query);
+    history.pushState({}, "", url);
+    requestAnimationFrame(() =>
+      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
   };
-  return <section id="catalogo" className="catalog-section">
-    <div className="catalog-heading"><p className="eyebrow text-[10px] text-olive sm:text-xs">{cards.length} diseños para elegir</p><h2 className="mt-1 font-script text-5xl text-wine sm:text-6xl md:text-7xl">{CATALOG_COPY.catalogHeading}</h2></div>
-    <div className="catalog-controls">
-      <div className="category-scroll-hint"><CategoryFilter value={filter} counts={counts} onChange={(next) => { setFilter(next); setPage(1); setOpen(null); }} /></div>
-      <div className="catalog-tools">
-        <label className="search-field"><Search aria-hidden className="h-4 w-4 text-olive" /><span className="sr-only">Buscar tarjetas por nombre</span><input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); setOpen(null); }} placeholder="Buscar un diseño" className="w-full bg-transparent outline-none placeholder:text-muted-foreground" /></label>
-        <p className="selection-status" aria-live="polite">{list.length} {list.length === 1 ? "diseño" : "diseños"}</p>
+  const chooseFilter = (next: Filter) => {
+    setFilter(next);
+    setLetter("");
+    setPage(1);
+    const url = new URL(window.location.href);
+    if (next === "todas") url.searchParams.delete("cat");
+    else url.searchParams.set("cat", next);
+    url.searchParams.delete("p");
+    history.pushState({}, "", url);
+    document
+      .querySelector("#catalogo-grid-anchor")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const modalIndex = open ? list.findIndex((card) => card.id === open) : -1;
+  return (
+    <section id="catalogo" className="catalog-section">
+      <Reveal>
+        <div className="catalog-heading">
+          <p className="eyebrow text-[10px] text-olive sm:text-xs">104 diseños para elegir</p>
+          <h2 className="mt-1 font-script text-5xl text-wine sm:text-6xl md:text-7xl">{`Nuestras tarjetas`}</h2>
+          <p>Pequeños detalles para acompañar grandes regalos.</p>
+        </div>
+      </Reveal>
+      <div className="catalog-controls">
+        <div className="category-scroll-hint">
+          <div role="group" aria-label="Filtrar por categoría" className="category-filter">
+            {options.map(({ id, label }) => (
+              <button
+                type="button"
+                key={id}
+                aria-pressed={filter === id}
+                onClick={() => chooseFilter(id)}
+                className="category-chip"
+              >
+                {label} <span>({counts[id]})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="catalog-tools">
+          <label className="search-field">
+            <Search aria-hidden className="h-4 w-4 text-olive" />
+            <span className="sr-only">Buscar tarjetas por nombre</span>
+            <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+                const url = new URL(window.location.href);
+                if (event.target.value.trim()) url.searchParams.set("q", event.target.value.trim());
+                else url.searchParams.delete("q");
+                url.searchParams.delete("p");
+                history.replaceState({}, "", url);
+              }}
+              placeholder="Buscar un diseño"
+            />
+          </label>
+          <p className="selection-status" aria-live="polite">
+            {list.length} diseños
+          </p>
+        </div>
+        {filter === "letras" && (
+          <div className="letter-picker" role="group" aria-label="Filtrar por inicial">
+            {[
+              ...new Set(
+                cards
+                  .filter((card) => card.category === "iniciales")
+                  .map((card) => card.name.replace("Inicial ", "")),
+              ),
+            ]
+              .sort((a, b) => a.localeCompare(b))
+              .map((initial) => (
+                <button
+                  key={initial}
+                  type="button"
+                  aria-pressed={letter === initial}
+                  onClick={() => {
+                    setLetter(letter === initial ? "" : initial);
+                    setPage(1);
+                  }}
+                >
+                  {initial}
+                </button>
+              ))}
+          </div>
+        )}
+        {pageCount > 1 && (
+          <nav aria-label="Páginas del catálogo" className="catalog-pagination">
+            <button
+              type="button"
+              disabled={safePage === 1}
+              aria-label="Página anterior"
+              onClick={() => movePage(Math.max(1, safePage - 1))}
+            >
+              ‹
+            </button>
+            {Array.from({ length: Math.min(pageCount, 5) }, (_, i) =>
+              Math.min(Math.max(1, safePage - 2) + i, pageCount),
+            )
+              .filter((n, i, all) => all.indexOf(n) === i)
+              .map((n) => (
+                <button
+                  type="button"
+                  key={n}
+                  aria-label={`Página ${n}`}
+                  aria-current={safePage === n ? "page" : undefined}
+                  onClick={() => movePage(n)}
+                >
+                  {n}
+                </button>
+              ))}
+            <button
+              type="button"
+              disabled={safePage === pageCount}
+              aria-label="Página siguiente"
+              onClick={() => movePage(Math.min(pageCount, safePage + 1))}
+            >
+              ›
+            </button>
+          </nav>
+        )}
       </div>
-    </div>
-    <motion.div ref={gridRef} layout className="catalog-grid mx-auto mt-4 grid max-w-7xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:mt-6 md:grid-cols-4 md:gap-6">
-      <AnimatePresence mode="popLayout">{visible.map((card, i) => <GiftCard key={card.id} card={card} onOpen={() => setOpen((page-1)*12+i)} favorite={favoriteIds.includes(card.id)} onToggleFavorite={() => onToggleFavorite(card.id)} quantity={quantities[card.id] ?? 0} onQuantity={(n) => onQuantity(card.id,n)} />)}</AnimatePresence>
-    </motion.div>
-    {pageCount > 1 && <nav aria-label="Páginas del catálogo" className="catalog-pagination">
-      <button type="button" aria-label="Página anterior" disabled={page===1} onClick={() => changePage(Math.max(1,page-1))}>‹</button>
-      {Array.from({length:pageCount},(_,i)=>i+1).map((n)=><button type="button" key={n} aria-label={`Página ${n}`} aria-current={page===n?"page":undefined} onClick={() => changePage(n)}>{n}</button>)}
-      <button type="button" aria-label="Página siguiente" disabled={page===pageCount} onClick={() => changePage(Math.min(pageCount,page+1))}>›</button>
-    </nav>}
-    <AnimatePresence>{open !== null && list.length > 0 && <CardModal list={list} index={open} onClose={() => setOpen(null)} onMove={(d) => setOpen((i) => ((i ?? 0)+d+list.length)%list.length)} favoriteIds={favoriteIds} onToggleFavorite={onToggleFavorite} onQuantity={onQuantity} />}</AnimatePresence>
-  </section>;
+      <div id="catalogo-grid-anchor" ref={gridRef} />
+      <div className="catalog-grid">
+        {visible.map((card) => (
+          <ProductCard
+            key={card.id}
+            card={card}
+            quantity={quantities[card.id] ?? 0}
+            onQuantity={(n) => onQuantity(card.id, n)}
+            onOpen={() => setOpen(card.id)}
+          />
+        ))}
+      </div>
+      {pageCount > 1 && safePage < pageCount && (
+        <button type="button" className="catalog-next" onClick={() => movePage(safePage + 1)}>
+          Siguiente →
+        </button>
+      )}
+      <AnimatePresence>
+        {modalIndex >= 0 && (
+          <CardModal
+            key={list[modalIndex]!.id}
+            list={list}
+            index={modalIndex}
+            onClose={() => setOpen(null)}
+            onMove={(delta) => setOpen(list[(modalIndex + delta + list.length) % list.length]!.id)}
+            quantity={quantities[list[modalIndex]!.id] ?? 0}
+            onQuantity={(n) => onQuantity(list[modalIndex]!.id, n)}
+          />
+        )}
+      </AnimatePresence>
+    </section>
+  );
 }
+
