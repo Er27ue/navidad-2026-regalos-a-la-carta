@@ -1,67 +1,191 @@
-export type CategoryId = "iniciales" | "santa" | "nacimiento" | "florales" | "frases" | "animales" | "gnomos" | "puertas" | "detalles";
+export type CategoryId =
+  | "iniciales"
+  | "santa"
+  | "nacimiento"
+  | "florales"
+  | "frases"
+  | "animales"
+  | "gnomos"
+  | "puertas"
+  | "detalles";
 
 export interface Card {
   id: string;
   name: string;
   category: CategoryId;
+  order: number;
+  thumb: string;
+  front: string;
+  /** A shared branded reverse is rendered when the source catalog has no separate image. */
+  back: null;
+  /** Portrait product mockup ratio; the source PDF does not state physical dimensions. */
+  ratio: number;
   image: string;
   accent?: string;
 }
 
 export const categories: { id: CategoryId; label: string; blurb: string; cover: string }[] = [
-  { id: "iniciales", label: "Letras", blurb: "Letras ilustradas para personalizar", cover: "/cards/001.jpg" },
-  { id: "santa", label: "Santa Claus", blurb: "Santa y sus personajes navideños", cover: "/cards/020.jpg" },
-  { id: "nacimiento", label: "Natividad", blurb: "Ilustraciones del nacimiento", cover: "/cards/032.jpg" },
-  { id: "florales", label: "Florales y coronas", blurb: "Ramas, flores y coronas", cover: "/cards/018.jpg" },
+  {
+    id: "iniciales",
+    label: "Letras",
+    blurb: "Letras ilustradas para personalizar",
+    cover: "/cards/001.jpg",
+  },
+  {
+    id: "santa",
+    label: "Santa Claus",
+    blurb: "Santa y sus personajes navideños",
+    cover: "/cards/020.jpg",
+  },
+  {
+    id: "nacimiento",
+    label: "Natividad",
+    blurb: "Ilustraciones del nacimiento",
+    cover: "/cards/032.jpg",
+  },
+  {
+    id: "florales",
+    label: "Florales y coronas",
+    blurb: "Ramas, flores y coronas",
+    cover: "/cards/018.jpg",
+  },
   { id: "frases", label: "Frases", blurb: "Mensajes para compartir", cover: "/cards/021.jpg" },
   { id: "animales", label: "Animalitos", blurb: "Compañeros de invierno", cover: "/cards/025.jpg" },
-  { id: "gnomos", label: "Gnomos y duendes", blurb: "Pequeños personajes festivos", cover: "/cards/089.jpg" },
-  { id: "puertas", label: "Puertas y casas", blurb: "Entradas y casitas de Navidad", cover: "/cards/016.jpg" },
-  { id: "detalles", label: "Detalles navideños", blurb: "Moños, estrellas, velas y más", cover: "/cards/030.jpg" },
+  {
+    id: "gnomos",
+    label: "Gnomos y duendes",
+    blurb: "Pequeños personajes festivos",
+    cover: "/cards/089.jpg",
+  },
+  {
+    id: "puertas",
+    label: "Puertas y casas",
+    blurb: "Entradas y casitas de Navidad",
+    cover: "/cards/016.jpg",
+  },
+  {
+    id: "detalles",
+    label: "Detalles navideños",
+    blurb: "Moños, estrellas, velas y más",
+    cover: "/cards/030.jpg",
+  },
 ];
 
 // [number, name, category] — image lives at /public/cards/NNN.jpg
 const raw: [number, string, CategoryId | "decoracion"][] = [
-  [1, "Inicial P", "iniciales"], [2, "Inicial B", "iniciales"], [3, "Inicial I", "iniciales"],
-  [4, "Inicial N", "iniciales"], [5, "Inicial K", "iniciales"], [6, "Inicial T", "iniciales"],
-  [7, "Inicial F", "iniciales"], [8, "Inicial Y", "iniciales"], [9, "Inicial M", "iniciales"],
-  [10, "Inicial D", "iniciales"], [11, "Inicial H", "iniciales"], [12, "Ho Ho Ho escocés", "frases"],
-  [13, "Inicial U", "iniciales"], [14, "Inicial O", "iniciales"], [15, "Ramo con esferas", "decoracion"],
-  [16, "Puerta roja", "decoracion"], [17, "Vela de acebo", "decoracion"], [18, "Corona verde", "decoracion"],
-  [19, "Pino con lazo", "decoracion"], [20, "Santa clásico", "santa"], [21, "Holly Jolly Merry Happy", "frases"],
-  [22, "Warm Winter Wishes", "frases"], [23, "Merry Christmas to you", "frases"], [24, "Puerta de madera", "decoracion"],
-  [25, "Petirrojo invernal", "decoracion"], [26, "Pesebre con animales", "nacimiento"], [27, "Ho Ho Ho festivo", "frases"],
-  [28, "Farol rojo", "decoracion"], [29, "Rama nevada", "decoracion"], [30, "Lazo escocés", "decoracion"],
-  [31, "Guirnalda roja", "decoracion"], [32, "Sagrada Familia", "nacimiento"], [33, "Merry Christmas colorido", "frases"],
-  [34, "Ho Ho Ho muñeco", "frases"], [35, "Guirnalda de piñas", "decoracion"], [36, "Santa de pie", "santa"],
-  [37, "Lazo marfil", "decoracion"], [38, "Merry Christmas gorro", "frases"], [39, "Merry Christmas acuarela", "frases"],
-  [40, "Ho Ho Ho trineo", "frases"], [41, "Puertita navideña", "decoracion"], [42, "Ángel dorado", "nacimiento"],
-  [43, "Lazo con esferas", "decoracion"], [44, "Cinta candy", "decoracion"], [45, "Virgen y niño", "nacimiento"],
-  [46, "Moño rojo", "decoracion"], [47, "Farol y petirrojo", "decoracion"], [48, "Merry Christmas campanas", "frases"],
-  [49, "Regalo a rayas", "decoracion"], [50, "Merry Christmas duende", "frases"], [51, "Cascabeles", "decoracion"],
-  [52, "Arbolito en maceta", "decoracion"], [53, "Corona con moño", "decoracion"], [54, "Pino en cesta", "decoracion"],
-  [55, "Ho! Ho! Ho!", "frases"], [56, "Traje de Santa", "santa"], [57, "Piñas de pino", "decoracion"],
-  [58, "Ho! bastones", "frases"], [59, "María", "nacimiento"], [60, "Jarrón invernal", "decoracion"],
-  [61, "Casita roja", "decoracion"], [62, "Reno Merry Christmas", "frases"], [63, "Christmas caligrafía", "frases"],
-  [64, "Pino dorado", "decoracion"], [65, "Santa bailarín", "santa"], [66, "Guirnalda con moño", "decoracion"],
-  [67, "Merry Christmas arbolitos", "frases"], [68, "Rama de invierno", "decoracion"], [69, "Tronco festivo", "decoracion"],
-  [70, "Frascos de eucalipto", "decoracion"], [71, "Love Christmas", "frases"], [72, "Carita de reno", "santa"],
-  [73, "Feliz Ho Ho", "santa"], [74, "Ramillete", "decoracion"], [75, "Velas y poinsettia", "decoracion"],
-  [76, "Ho Ho Ho Santa", "santa"], [77, "Vela de canela", "decoracion"], [78, "Merry Christmas bloque", "frases"],
-  [79, "Angelitos", "nacimiento"], [80, "Guirnalda natural", "decoracion"], [81, "Arbolito de corazones", "decoracion"],
-  [82, "Sagrada Familia acuarela", "nacimiento"], [83, "Merry Christmas acebo", "frases"], [84, "Feliz Navidad en auto", "santa"],
-  [85, "Renito tierno", "santa"], [86, "Osito navideño", "santa"], [87, "Merry Christmas ilustrado", "frases"],
-  [88, "Estrellas colgantes", "decoracion"], [89, "Gnomo en trineo", "santa"], [90, "Gnomo estrella", "santa"],
-  [91, "Estrella roja", "decoracion"], [92, "Santa North Pole", "santa"], [93, "Calcetines rojos", "decoracion"],
-  [94, "Calcetines tejidos", "decoracion"], [95, "Guirnalda de faroles", "decoracion"], [96, "Gnomo con esfera", "santa"],
-  [97, "Gnomo y renos", "santa"], [98, "Duendecita", "santa"], [99, "Angelita", "nacimiento"],
-  [100, "Ángel navideño", "nacimiento"], [101, "Patrón de pinos", "decoracion"], [102, "Esferas festivas", "decoracion"],
-  [103, "Esferas colgantes", "decoracion"], [104, "Happy Holidays", "frases"],
+  [1, "Inicial P", "iniciales"],
+  [2, "Inicial B", "iniciales"],
+  [3, "Inicial I", "iniciales"],
+  [4, "Inicial N", "iniciales"],
+  [5, "Inicial K", "iniciales"],
+  [6, "Inicial T", "iniciales"],
+  [7, "Inicial F", "iniciales"],
+  [8, "Inicial Y", "iniciales"],
+  [9, "Inicial M", "iniciales"],
+  [10, "Inicial D", "iniciales"],
+  [11, "Inicial H", "iniciales"],
+  [12, "Ho Ho Ho escocés", "frases"],
+  [13, "Inicial U", "iniciales"],
+  [14, "Inicial O", "iniciales"],
+  [15, "Ramo con esferas", "decoracion"],
+  [16, "Puerta roja", "decoracion"],
+  [17, "Vela de acebo", "decoracion"],
+  [18, "Corona verde", "decoracion"],
+  [19, "Pino con lazo", "decoracion"],
+  [20, "Santa clásico", "santa"],
+  [21, "Holly Jolly Merry Happy", "frases"],
+  [22, "Warm Winter Wishes", "frases"],
+  [23, "Merry Christmas to you", "frases"],
+  [24, "Puerta de madera", "decoracion"],
+  [25, "Petirrojo invernal", "decoracion"],
+  [26, "Pesebre con animales", "nacimiento"],
+  [27, "Ho Ho Ho festivo", "frases"],
+  [28, "Farol rojo", "decoracion"],
+  [29, "Rama nevada", "decoracion"],
+  [30, "Lazo escocés", "decoracion"],
+  [31, "Guirnalda roja", "decoracion"],
+  [32, "Sagrada Familia", "nacimiento"],
+  [33, "Merry Christmas colorido", "frases"],
+  [34, "Ho Ho Ho muñeco", "frases"],
+  [35, "Guirnalda de piñas", "decoracion"],
+  [36, "Santa de pie", "santa"],
+  [37, "Lazo marfil", "decoracion"],
+  [38, "Merry Christmas gorro", "frases"],
+  [39, "Merry Christmas acuarela", "frases"],
+  [40, "Ho Ho Ho trineo", "frases"],
+  [41, "Puertita navideña", "decoracion"],
+  [42, "Ángel dorado", "nacimiento"],
+  [43, "Lazo con esferas", "decoracion"],
+  [44, "Cinta candy", "decoracion"],
+  [45, "Virgen y niño", "nacimiento"],
+  [46, "Moño rojo", "decoracion"],
+  [47, "Farol y petirrojo", "decoracion"],
+  [48, "Merry Christmas campanas", "frases"],
+  [49, "Regalo a rayas", "decoracion"],
+  [50, "Merry Christmas duende", "frases"],
+  [51, "Cascabeles", "decoracion"],
+  [52, "Arbolito en maceta", "decoracion"],
+  [53, "Corona con moño", "decoracion"],
+  [54, "Pino en cesta", "decoracion"],
+  [55, "Ho! Ho! Ho!", "frases"],
+  [56, "Traje de Santa", "santa"],
+  [57, "Piñas de pino", "decoracion"],
+  [58, "Ho! bastones", "frases"],
+  [59, "María", "nacimiento"],
+  [60, "Jarrón invernal", "decoracion"],
+  [61, "Casita roja", "decoracion"],
+  [62, "Reno Merry Christmas", "frases"],
+  [63, "Christmas caligrafía", "frases"],
+  [64, "Pino dorado", "decoracion"],
+  [65, "Santa bailarín", "santa"],
+  [66, "Guirnalda con moño", "decoracion"],
+  [67, "Merry Christmas arbolitos", "frases"],
+  [68, "Rama de invierno", "decoracion"],
+  [69, "Tronco festivo", "decoracion"],
+  [70, "Frascos de eucalipto", "decoracion"],
+  [71, "Love Christmas", "frases"],
+  [72, "Carita de reno", "santa"],
+  [73, "Feliz Ho Ho", "santa"],
+  [74, "Ramillete", "decoracion"],
+  [75, "Velas y poinsettia", "decoracion"],
+  [76, "Ho Ho Ho Santa", "santa"],
+  [77, "Vela de canela", "decoracion"],
+  [78, "Merry Christmas bloque", "frases"],
+  [79, "Angelitos", "nacimiento"],
+  [80, "Guirnalda natural", "decoracion"],
+  [81, "Arbolito de corazones", "decoracion"],
+  [82, "Sagrada Familia acuarela", "nacimiento"],
+  [83, "Merry Christmas acebo", "frases"],
+  [84, "Feliz Navidad en auto", "santa"],
+  [85, "Renito tierno", "santa"],
+  [86, "Osito navideño", "santa"],
+  [87, "Merry Christmas ilustrado", "frases"],
+  [88, "Estrellas colgantes", "decoracion"],
+  [89, "Gnomo en trineo", "santa"],
+  [90, "Gnomo estrella", "santa"],
+  [91, "Estrella roja", "decoracion"],
+  [92, "Santa North Pole", "santa"],
+  [93, "Calcetines rojos", "decoracion"],
+  [94, "Calcetines tejidos", "decoracion"],
+  [95, "Guirnalda de faroles", "decoracion"],
+  [96, "Gnomo con esfera", "santa"],
+  [97, "Gnomo y renos", "santa"],
+  [98, "Duendecita", "santa"],
+  [99, "Angelita", "nacimiento"],
+  [100, "Ángel navideño", "nacimiento"],
+  [101, "Patrón de pinos", "decoracion"],
+  [102, "Esferas festivas", "decoracion"],
+  [103, "Esferas colgantes", "decoracion"],
+  [104, "Happy Holidays", "frases"],
 ];
 
 function assignCategory(name: string, original: CategoryId | "decoracion"): CategoryId {
-  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (original === "iniciales" || original === "frases" || original === "nacimiento") return original;
+  const normalized = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (original === "iniciales" || original === "frases" || original === "nacimiento")
+    return original;
   if (/gnomo|duende/.test(normalized)) return "gnomos";
   if (/puerta|casita|casa roja/.test(normalized)) return "puertas";
   if (/reno|renito|petirrojo|osito|oso|animal/.test(normalized)) return "animales";
@@ -74,5 +198,11 @@ export const cards: Card[] = raw.map(([n, name, originalCategory]) => ({
   id: `c${n}`,
   name,
   category: assignCategory(name, originalCategory),
+  order: n,
+  thumb: `/cards/${String(n).padStart(3, "0")}.jpg`,
+  front: `/cards/${String(n).padStart(3, "0")}.jpg`,
+  back: null,
+  ratio: 0.72,
   image: `/cards/${String(n).padStart(3, "0")}.jpg`,
 }));
+
