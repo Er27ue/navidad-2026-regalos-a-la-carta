@@ -510,14 +510,11 @@
   text-align: center;
 }
 .catalog-controls {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  position: relative;
+  z-index: 10;
   width: min(100%, 1120px);
-  margin: 11px auto 0;
-  background: color-mix(in oklab, var(--cream) 95%, transparent);
+  margin: 16px auto 0;
   padding: 8px 0 10px;
-  backdrop-filter: blur(12px);
 }
 .category-scroll-hint {
   position: relative;
@@ -539,12 +536,12 @@
 }
 .category-filter {
   display: flex;
-  width: max-content;
-  min-width: 100%;
+  flex-wrap: wrap;
+  width: 100%;
   align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  padding: 0 4px;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 8px;
 }
 .category-chip {
   position: relative;
@@ -1426,8 +1423,7 @@ html {
   font-size: 9px;
 }
 .catalog-controls {
-  position: sticky;
-  top: 48px;
+  position: static;
   margin-top: 5px;
   padding: 7px 0 8px;
 }
@@ -1524,32 +1520,36 @@ html {
 }
 .product-paper {
   position: relative;
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  place-items: center;
+  aspect-ratio: 0.72;
   overflow: hidden;
-  border: 1px solid #e7dfd4;
-  border-radius: 7px;
-  background: #faf8f1;
+  border: 1px solid #e2d9cd;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
   box-shadow:
-    0 4px 0 #e5dccc,
-    0 8px 14px #35281c17;
+    0 2px 0 #ede4d8,
+    0 6px 16px rgba(53, 40, 28, 0.08);
   perspective: 700px;
 }
 .product-paper::after {
   position: absolute;
-  inset: 3px -3px -3px 3px;
-  z-index: -1;
-  border: 1px solid #e1d7c9;
-  border-radius: 7px;
-  background: #f5efe4;
+  inset: 2px;
+  border: 1px solid #f3ece2;
+  border-radius: 8px;
+  pointer-events: none;
   content: "";
 }
 .product-paper img {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  padding: 5px;
+  padding: 2px;
   transition: transform 500ms var(--motion-ease);
 }
 .product-glint {
@@ -1719,20 +1719,24 @@ html {
 .modal-face {
   position: absolute;
   inset: 0;
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  place-items: center;
-  border: 8px solid #fff;
-  border-radius: 11px;
-  background: #faf8f1;
+  border: 1px solid #e2d9cd;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px;
   box-shadow:
-    0 17px 35px #332a2333,
-    0 3px 0 #e0d6c8;
+    0 18px 40px rgba(51, 42, 35, 0.18),
+    0 2px 0 #ede4d8;
   backface-visibility: hidden;
 }
 .modal-face img {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
 .modal-reverse {
@@ -2123,9 +2127,6 @@ html {
   }
   .order-quantity button {
     width: 36px;
-  }
-  .catalog-controls {
-    top: 54px;
   }
 }
 @media (max-width: 389px) {

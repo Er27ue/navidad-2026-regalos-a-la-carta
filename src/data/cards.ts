@@ -16,8 +16,8 @@ export interface Card {
   order: number;
   thumb: string;
   front: string;
-  /** A shared branded reverse is rendered when the source catalog has no separate image. */
-  back: null;
+  /** El reverso oficial de la marca idéntico al PDF de Yaritza Madera Creations */
+  back: string;
   /** Portrait product mockup ratio; the source PDF does not state physical dimensions. */
   ratio: number;
   image: string;
@@ -201,7 +201,7 @@ export const cards: Card[] = raw.map(([n, name, originalCategory]) => ({
   order: n,
   thumb: `/cards/${String(n).padStart(3, "0")}.jpg`,
   front: `/cards/${String(n).padStart(3, "0")}.jpg`,
-  back: null,
+  back: `/cards/back.jpg`,
   ratio: 0.72,
   image: `/cards/${String(n).padStart(3, "0")}.jpg`,
 }));

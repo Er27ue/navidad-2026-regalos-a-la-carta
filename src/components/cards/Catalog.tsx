@@ -110,12 +110,13 @@ function QtyControl({
 
 function ProductBack() {
   return (
-    <div className="product-back" aria-label="Reverso de marca">
-      <span className="reverse-branch">✦</span>
-      <p>Con cariño,</p>
-      <strong>Yaritza Madera</strong>
-      <small>CREATIONS · NAVIDAD 2026</small>
-      <span className="reverse-flower">❧</span>
+    <div className="product-back" aria-label="Reverso oficial de la tarjeta">
+      <img
+        src="/cards/back.jpg"
+        alt="Reverso de tarjeta Yaritza Madera Creations"
+        className="h-full w-full object-contain"
+        loading="lazy"
+      />
     </div>
   );
 }
@@ -293,9 +294,14 @@ function CardModal({
             <ChevronRight />
           </button>
         </div>
-        <div className="modal-packages" aria-label="Cantidades sugeridas">
-          {[5, 10, 15, 20, 50].map((n) => (
-            <button type="button" key={n} onClick={() => onQuantity(n)}>
+        <div className="modal-packages" aria-label="Cantidades rápidas sugeridas">
+          {[1, 5, 10, 15, 20].map((n) => (
+            <button
+              type="button"
+              key={n}
+              className={quantity === n ? "is-active font-bold border-wine bg-wine/10" : ""}
+              onClick={() => onQuantity(n)}
+            >
               {n}
             </button>
           ))}
@@ -379,9 +385,9 @@ export function Catalog({
     url.searchParams.set("p", String(next));
     if (query) url.searchParams.set("q", query);
     history.pushState({}, "", url);
-    requestAnimationFrame(() =>
-      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    );
+    requestAnimationFrame(() => {
+      document.querySelector("#catalogo-grid-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
   const chooseFilter = (next: Filter) => {
     setFilter(next);
@@ -392,9 +398,9 @@ export function Catalog({
     else url.searchParams.set("cat", next);
     url.searchParams.delete("p");
     history.pushState({}, "", url);
-    document
-      .querySelector("#catalogo-grid-anchor")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      document.querySelector("#catalogo-grid-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
   const modalIndex = open ? list.findIndex((card) => card.id === open) : -1;
   return (
@@ -505,8 +511,8 @@ export function Catalog({
           </nav>
         )}
       </div>
-      <div id="catalogo-grid-anchor" ref={gridRef} />
-      <div className="catalog-grid">
+      <div id="catalogo-grid-anchor" ref={gridRef} className="scroll-mt-6" />
+      <div className="catalog-grid transition-opacity duration-300">
         {visible.map((card) => (
           <ProductCard
             key={card.id}

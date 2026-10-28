@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { ArrowUp, Instagram, MessageCircle, Minus, Plus, Trash2 } from "lucide-react";
+import { ArrowUp, Download, Instagram, MessageCircle, Minus, Plus, Share2, Trash2 } from "lucide-react";
 import type { Card } from "@/data/cards";
+import { generateOrderPdfBlob } from "@/lib/pdfGenerator";
 import {
   buildOrderMessage,
   CATEGORY_NAMES,
@@ -100,77 +101,106 @@ export function ContactSection({
     window.setTimeout(() => setNotice(""), 3000);
   };
 
-  const sendOrder = async (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!items.length) return;
-    if (!customerName.trim()) {
-      event.preventDefault();
-      setNotice("Escribe el nombre para preparar el pedido.");
-      document.querySelector<HTMLInputElement>("#customer-name")?.focus();
-      return;
-    }
-    if (encodeURIComponent(message).length <= 3000) return;
+  const [isSending, setIsSending] = useState(false);
+
+  const sendOrder = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    window.open(
-      whatsappUrl(
-        `Hola Yaritza 👋, quisiera hacer el pedido ${code} a nombre de ${customerName.trim()}. Son ${total} tarjetas; te paso el detalle.`,
-      ),
-      "_blank",
-      "noopener,noreferrer",
-    );
-    try {
-      await navigator.clipboard.writeText(message);
-      tellCopied("Lista copiada, pégala en el chat.");
-    } catch {
-      tellCopied("El pedido es extenso. Descarga el PDF y envíalo por separado.");
-    }
-  };
-
-  const copyAndInstagram = async () => {
     if (!items.length) {
-      window.open(`https://ig.me/m/${INSTAGRAM}`, "_blank", "noopener,noreferrer");
+      setNotice("Añade al menos una tarjeta a tu pedido.");
       return;
     }
     if (!customerName.trim()) {
-      setNotice("Escribe el nombre para preparar el pedido.");
+      setNotice("Por favor escribe tu nombre para preparar el pedido.");
       document.querySelector<HTMLInputElement>("#customer-name")?.focus();
       return;
     }
+
+    setIsSending(true);
+    setNotice("Generando PDF navideño del pedido...");
+
     try {
-      await navigator.clipboard.writeText(message);
-      tellCopied("Lista copiada, pégala en el chat de Instagram.");
-    } catch {
-      tellCopied("No se pudo copiar automáticamente. Prueba enviar por WhatsApp.");
+      const { blob, filename } = await generateOrderPdfBlob({
+        code,
+        customerName,
+        notes,
+        items,
+      });
+
+      const file = new File([blob], filename, { type: "application/pdf" });
+
+      // Verificamos si el navegador soporta compartir archivos nativamente (especialmente celulares)
+      if (
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] }) &&
+        typeof navigator.share === "function"
+      ) {
+        setNotice("Abriendo menú de compartir... Elige WhatsApp y el chat de Yaritza");
+        await navigator.share({
+          files: [file],
+          title: `Pedido ${code} - ${customerName.trim()}`,
+          text: `Hola Yaritza, te adjunto mi pedido ${code} a nombre de ${customerName.trim()}.`,
+        });
+        setNotice("¡Pedido compartido con éxito!");
+      } else {
+        // Fallback para computadoras o navegadores sin soporte de compartir archivos (descarga automática + abre chat)
+        setNotice("Descargando PDF... Se abrirá WhatsApp para que lo adjuntes en el chat");
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+
+        // Abrir WhatsApp limpio de mamá
+        window.setTimeout(() => {
+          window.open(whatsappUrl(), "_blank", "noopener,noreferrer");
+        }, 1200);
+      }
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        setNotice("Hubo un detalle al compartir. Descargando PDF como respaldo...");
+        downloadOrder();
+      } else {
+        setNotice("");
+      }
+    } finally {
+      setIsSending(false);
     }
-    window.open(`https://ig.me/m/${INSTAGRAM}`, "_blank", "noopener,noreferrer");
   };
 
-  const downloadOrder = () => {
+  const downloadOrder = async () => {
     if (!items.length) {
       setNotice("Añade al menos una tarjeta para preparar la hoja del pedido.");
       return;
     }
     if (!customerName.trim()) {
-      setNotice("Escribe el nombre para preparar la hoja del pedido.");
+      setNotice("Escribe tu nombre para preparar la hoja del pedido.");
       document.querySelector<HTMLInputElement>("#customer-name")?.focus();
       return;
     }
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      setNotice("Permite la ventana de impresión para guardar el PDF.");
-      return;
+
+    try {
+      setNotice("Preparando descarga del PDF...");
+      const { blob, filename } = await generateOrderPdfBlob({
+        code,
+        customerName,
+        notes,
+        items,
+      });
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      setNotice("¡PDF descargado con éxito!");
+    } catch {
+      setNotice("Error al generar el PDF.");
     }
-    const date = new Intl.DateTimeFormat("es-DO", { dateStyle: "long" }).format(new Date());
-    const rows = grouped
-      .map(
-        ({ category, lines }) =>
-          `<tr class="group"><th colspan="5">${escapeHtml(CATEGORY_NAMES[category])}</th></tr>${lines.map(({ card, quantity }) => `<tr><td><img src="${card.thumb}" alt=""><span>${escapeHtml(card.name)}</span></td><td>${escapeHtml(CATEGORY_NAMES[card.category])}</td><td>${quantity}</td><td>□</td><td>□</td></tr>`).join("")}`,
-      )
-      .join("");
-    const totalDesigns = items.length;
-    printWindow.document.write(
-      `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Pedido ${code} · Yaritza Madera Creations</title><style>@page{size:A4 portrait;margin:16mm}*{box-sizing:border-box}body{font:12px Arial,sans-serif;color:#342a27}header{border-bottom:2px solid #9b3a4b;padding-bottom:12px;margin-bottom:18px}h1{font:32px Georgia,serif;color:#9b3a4b;margin:0 0 8px}header p{margin:4px 0}table{width:100%;border-collapse:collapse}th,td{padding:7px;border:1px solid #ded6cf;text-align:left}th{background:#f5f0e8}.group th{background:#e9ded4;color:#7a3040}td:first-child{display:flex;align-items:center;gap:8px}td img{width:42px;height:48px;object-fit:contain}td:nth-child(3),td:nth-child(4),td:nth-child(5){text-align:center;width:55px}.total{font-weight:bold;text-align:right;padding:12px 0}.notes{border-top:1px solid #ddd;padding-top:10px}.footer{margin-top:24px;color:#777;text-align:center;font-size:10px}.check{font-size:22px}</style></head><body><header><h1>Pedido de tarjetas · Navidad 2026</h1><p><b>${escapeHtml(code)}</b> · ${escapeHtml(date)}</p><p>A nombre de: <b>${escapeHtml(customerName.trim())}</b></p><p>Yaritza Madera Creations</p></header><table><thead><tr><th>Tarjeta</th><th>Categoría</th><th>Cantidad</th><th>Preparada</th><th>Empaquetada</th></tr></thead><tbody>${rows}</tbody></table><p class="total">Total: ${total} tarjetas (${totalDesigns} diseños)</p>${notes.trim() ? `<p class="notes"><b>Notas:</b> ${escapeHtml(notes.trim())}</p>` : ""}<p class="footer">@${INSTAGRAM} · Hoja de trabajo opcional. El mensaje de WhatsApp contiene el pedido para Yaritza.</p><script>window.onload=()=>window.print()</script></body></html>`,
-    );
-    printWindow.document.close();
   };
 
   return (
@@ -295,26 +325,30 @@ export function ContactSection({
             {CATALOG_COPY.contactBody}
           </p>
           <div className="contact-actions">
-            <a
-              href={sendHref}
+            <button
+              type="button"
               onClick={(event) => void sendOrder(event)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="button button-light"
+              disabled={isSending}
+              className="button button-light flex items-center justify-center gap-2 font-bold shadow-md hover:scale-105 active:scale-95 transition-all"
             >
-              <MessageCircle aria-hidden="true" size={18} /> {CATALOG_COPY.whatsappButton}
-            </a>
-            <button type="button" onClick={downloadOrder} className="button button-translucent">
-              Descargar PDF del pedido
+              <MessageCircle aria-hidden="true" size={18} />
+              {isSending ? "Preparando pedido..." : "Enviar pedido (con PDF adjunto)"}
             </button>
             <button
               type="button"
-              onClick={() => void copyAndInstagram()}
-              className="button button-translucent"
+              onClick={downloadOrder}
+              className="button button-translucent flex items-center justify-center gap-2"
             >
-              <Instagram aria-hidden="true" size={18} />
-              {items.length ? "Copiar pedido y abrir Instagram" : "Instagram"}
+              <Download aria-hidden="true" size={16} /> Descargar PDF del pedido
             </button>
+            <a
+              href={whatsappUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="button button-translucent flex items-center justify-center gap-2"
+            >
+              <MessageCircle aria-hidden="true" size={16} /> Contactar a Yaritza
+            </a>
           </div>
           <p className="order-note">
             El WhatsApp con la lista es lo que recibe Yaritza. El PDF es una hoja de trabajo
@@ -381,7 +415,7 @@ export function BottomBar({ count }: { count: number }) {
         <span className="bottom-order-icon">✦</span>Mi pedido
         {count > 0 && <span className="bottom-count">{count}</span>}
       </a>
-      <a href={`https://wa.me/18097561978`} target="_blank" rel="noopener noreferrer">
+      <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer">
         <MessageCircle aria-hidden="true" size={17} />
         Contactar
       </a>

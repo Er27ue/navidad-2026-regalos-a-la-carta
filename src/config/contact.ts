@@ -1,7 +1,7 @@
 import type { Card, CategoryId } from "@/data/cards";
 
 /** Datos de contacto, textos editoriales y reglas de pedido del catálogo. */
-export const WHATSAPP_NUMBER = "18097561978";
+export const WHATSAPP_NUMBER = "18097571978";
 export const EMAIL = "[CORREO]";
 export const INSTAGRAM = "yaritzamaderacreations";
 export const INSTAGRAM_SECONDARY = "mamaandariega";

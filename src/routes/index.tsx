@@ -88,9 +88,7 @@ function Index() {
       <TopBar count={total} />
       <main className="pb-[calc(5rem+env(safe-area-inset-bottom))] pt-0 md:pb-0 md:pt-14">
         <Hero />
-        <CategoryOverview onChoose={chooseCategory} />
         <Welcome />
-        <Marquee />
         <Catalog
           filter={filter}
           setFilter={setFilter}
