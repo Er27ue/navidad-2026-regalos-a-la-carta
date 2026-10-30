@@ -89,7 +89,7 @@ export function Welcome() {
           <BrushBackdrop />
           <img
             className="artist-portrait rounded-2xl shadow-sm"
-            src="/yaritza.jpg"
+            src={`${import.meta.env.BASE_URL || "/"}yaritza.jpg`}
             alt="Yaritza Madera, artista e ilustradora"
             width="360"
             height="480"

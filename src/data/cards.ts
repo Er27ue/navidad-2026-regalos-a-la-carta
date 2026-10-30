@@ -32,50 +32,52 @@ export interface Card {
  */
 export const CARD_ROTATIONS: Record<string, 0 | 90 | 180 | 270> = {};
 
+const BASE = import.meta.env.BASE_URL || "/";
+
 export const categories: { id: CategoryId; label: string; blurb: string; cover: string }[] = [
   {
     id: "iniciales",
     label: "Letras",
     blurb: "Letras ilustradas para personalizar",
-    cover: "/cards/001.jpg",
+    cover: `${BASE}cards/001.jpg`,
   },
   {
     id: "santa",
     label: "Santa Claus",
     blurb: "Santa y sus personajes navideños",
-    cover: "/cards/020.jpg",
+    cover: `${BASE}cards/020.jpg`,
   },
   {
     id: "nacimiento",
     label: "Natividad",
     blurb: "Ilustraciones del nacimiento",
-    cover: "/cards/032.jpg",
+    cover: `${BASE}cards/032.jpg`,
   },
   {
     id: "florales",
     label: "Florales y coronas",
     blurb: "Ramas, flores y coronas",
-    cover: "/cards/018.jpg",
+    cover: `${BASE}cards/018.jpg`,
   },
-  { id: "frases", label: "Frases", blurb: "Mensajes para compartir", cover: "/cards/021.jpg" },
-  { id: "animales", label: "Animalitos", blurb: "Compañeros de invierno", cover: "/cards/025.jpg" },
+  { id: "frases", label: "Frases", blurb: "Mensajes para compartir", cover: `${BASE}cards/021.jpg` },
+  { id: "animales", label: "Animalitos", blurb: "Compañeros de invierno", cover: `${BASE}cards/025.jpg` },
   {
     id: "gnomos",
     label: "Gnomos y duendes",
     blurb: "Pequeños personajes festivos",
-    cover: "/cards/089.jpg",
+    cover: `${BASE}cards/089.jpg`,
   },
   {
     id: "puertas",
     label: "Puertas y casas",
     blurb: "Entradas y casitas de Navidad",
-    cover: "/cards/016.jpg",
+    cover: `${BASE}cards/016.jpg`,
   },
   {
     id: "detalles",
     label: "Detalles navideños",
     blurb: "Moños, estrellas, velas y más",
-    cover: "/cards/030.jpg",
+    cover: `${BASE}cards/030.jpg`,
   },
 ];
 
@@ -209,11 +211,11 @@ export const cards: Card[] = raw.map(([n, name, originalCategory]) => {
     name,
     category: assignCategory(name, originalCategory),
     order: n,
-    thumb: `/cards/${String(n).padStart(3, "0")}.jpg`,
-    front: `/cards/${String(n).padStart(3, "0")}.jpg`,
-    back: `/cards/back.jpg`,
+    thumb: `${BASE}cards/${String(n).padStart(3, "0")}.jpg`,
+    front: `${BASE}cards/${String(n).padStart(3, "0")}.jpg`,
+    back: `${BASE}cards/back.jpg`,
     ratio: 600 / 840,
-    image: `/cards/${String(n).padStart(3, "0")}.jpg`,
+    image: `${BASE}cards/${String(n).padStart(3, "0")}.jpg`,
     rotation: CARD_ROTATIONS[id] ?? 0,
   };
 });

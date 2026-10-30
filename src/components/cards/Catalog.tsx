@@ -145,7 +145,7 @@ function ProductBack() {
   return (
     <div className="product-back" aria-label="Reverso oficial de la tarjeta">
       <img
-        src="/cards/back.jpg"
+        src={`${import.meta.env.BASE_URL || "/"}cards/back.jpg`}
         alt="Reverso de tarjeta Yaritza Madera Creations"
         className="h-full w-full object-contain"
         loading="lazy"
