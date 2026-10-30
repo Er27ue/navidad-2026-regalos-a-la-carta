@@ -489,11 +489,6 @@ export function Catalog({
     holdGridHeight(source === "bottom" ? 700 : 350);
     setPage(next);
     setFadeTick((t) => t + 1);
-    const url = new URL(window.location.href);
-    url.searchParams.set("cat", filter);
-    url.searchParams.set("p", String(next));
-    if (query) url.searchParams.set("q", query);
-    history.pushState({}, "", url);
     if (source === "bottom") {
       scrollToCatalogTop();
     } else {
@@ -507,11 +502,6 @@ export function Catalog({
     setLetter("");
     setPage(1);
     setFadeTick((t) => t + 1);
-    const url = new URL(window.location.href);
-    if (next === "todas") url.searchParams.delete("cat");
-    else url.searchParams.set("cat", next);
-    url.searchParams.delete("p");
-    history.pushState({}, "", url);
     requestAnimationFrame(notifyLenisResize);
   };
   const modalIndex = open ? list.findIndex((card) => card.id === open) : -1;
@@ -549,11 +539,6 @@ export function Catalog({
               onChange={(event) => {
                 setQuery(event.target.value);
                 setPage(1);
-                const url = new URL(window.location.href);
-                if (event.target.value.trim()) url.searchParams.set("q", event.target.value.trim());
-                else url.searchParams.delete("q");
-                url.searchParams.delete("p");
-                history.replaceState({}, "", url);
               }}
               placeholder="Buscar un diseño"
             />

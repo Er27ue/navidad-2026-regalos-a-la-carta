@@ -53,10 +53,6 @@ function Index() {
   );
   const chooseCategory = (next: Filter) => {
     setFilter(next);
-    const url = new URL(window.location.href);
-    url.searchParams.set("cat", next);
-    url.searchParams.delete("p");
-    window.history.pushState({}, "", url);
     window.setTimeout(() => {
       const target = document.querySelector<HTMLElement>("#catalogo");
       if (!target) return;
