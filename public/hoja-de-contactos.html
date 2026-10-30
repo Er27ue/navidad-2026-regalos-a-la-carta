@@ -1,860 +1,448 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>Hoja de Contactos - Verificación de Tarjetas 1 a 104</title>
-<style>
-  body { font-family: system-ui, sans-serif; background: #f4efe9; color: #333; margin: 0; padding: 24px; }
-  h1 { text-align: center; color: #872e3f; }
-  p.subtitle { text-align: center; color: #666; margin-bottom: 32px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; max-width: 1300px; margin: 0 auto; }
-  .card-item { background: white; border-radius: 12px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); text-align: center; display: flex; flex-direction: column; align-items: center; }
-  .img-wrap { width: 140px; height: 180px; display: flex; align-items: center; justify-content: center; background: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 8px; border: 1px solid #eee; }
-  .img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  .tag { font-weight: bold; font-size: 14px; color: #872e3f; }
-  .name { font-size: 12px; color: #555; margin-top: 4px; }
-  .status { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
-  .status-rot { background: #fee2e2; color: #991b1b; }
-  .status-ok { background: #dcfce7; color: #166534; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hoja de Contactos Interactiva · 104 Tarjetas Navidad 2026</title>
+  <style>
+    :root {
+      --cream: #f6f3ec;
+      --wine: #8f3042;
+      --pine: #2c593d;
+      --olive: #6c7850;
+      --gold: #bd9250;
+      --ink: #383838;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      padding-bottom: 60px;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      background: rgba(255, 253, 248, 0.96);
+      border-bottom: 1px solid rgba(143, 48, 66, 0.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(56, 56, 56, 0.06);
+    }
+    .topbar-title h1 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--wine);
+    }
+    .topbar-title p {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--olive);
+    }
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(143, 48, 66, 0.28);
+      background: #fffdf8;
+      color: var(--wine);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--wine);
+      border-color: var(--wine);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(143, 48, 66, 0.25);
+    }
+    .btn-active {
+      background: var(--pine);
+      border-color: var(--pine);
+      color: #fff;
+    }
+    .counter-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(189, 146, 80, 0.18);
+      color: var(--wine);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .export-panel {
+      display: none;
+      max-width: 1280px;
+      margin: 16px auto 0;
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: #fffdf8;
+      border: 2px solid var(--wine);
+      box-shadow: 0 12px 30px rgba(56, 56, 56, 0.1);
+    }
+    .export-panel.is-open {
+      display: block;
+    }
+    .export-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .export-head strong {
+      color: var(--wine);
+      font-size: 14px;
+    }
+    .export-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(143, 48, 66, 0.25);
+      background: #faf7f0;
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 14px;
+      max-width: 1320px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .card-item {
+      user-select: none;
+      background: #fffdf8;
+      border: 1px solid rgba(143, 48, 66, 0.15);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 12px rgba(56, 56, 56, 0.05);
+    }
+    .card-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(56, 56, 56, 0.1);
+    }
+    .card-item.is-rotated {
+      border: 2px solid var(--wine);
+      background: #fff9f5;
+      box-shadow: 0 8px 22px rgba(143, 48, 66, 0.14);
+    }
+    .card-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .card-id {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--wine);
+      background: rgba(143, 48, 66, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .card-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--olive);
+    }
+    .img-wrap {
+      width: 150px;
+      height: 185px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid #e6ded2;
+      border-radius: 10px;
+      overflow: hidden;
+      padding: 10px;
+    }
+    .img-wrap img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-name {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.3;
+      min-height: 31px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rot-badge {
+      margin-top: 6px;
+      width: 100%;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      background: #f0ebe1;
+      color: var(--ink);
+    }
+    .card-item.is-rotated .rot-badge {
+      background: var(--wine);
+      color: #fff;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 50;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--pine);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+    }
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
 <body>
-<h1>Hoja de Contactos: 104 Tarjetas de Navidad 2026</h1>
-<p class="subtitle">Revisión de orientación y alineación basada en el PDF de Yaritza Madera Creations</p>
-<div class="grid">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>Hoja de Contactos Interactiva · 104 Tarjetas</h1>
+      <p>Haz clic en cualquier tarjeta para girarla 90° (0° → 90° → 180° → 270°). Luego pulsa "Exportar correcciones".</p>
+    </div>
+    <div class="topbar-actions">
+      <span id="rotated-count" class="counter-pill">0 giradas</span>
+      <button type="button" id="filter-all" class="btn btn-active">Todas (104)</button>
+      <button type="button" id="filter-rotated" class="btn">Solo giradas</button>
+      <button type="button" id="btn-reset" class="btn">Reiniciar a 0°</button>
+      <button type="button" id="btn-export" class="btn btn-primary">Exportar correcciones</button>
+    </div>
+  </header>
 
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/001.jpg" alt="Tarjeta 001" />
-      </div>
-      <span class="tag">#001</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/002.jpg" alt="Tarjeta 002" />
-      </div>
-      <span class="tag">#002</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/003.jpg" alt="Tarjeta 003" />
-      </div>
-      <span class="tag">#003</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/004.jpg" alt="Tarjeta 004" />
-      </div>
-      <span class="tag">#004</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/005.jpg" alt="Tarjeta 005" />
-      </div>
-      <span class="tag">#005</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/006.jpg" alt="Tarjeta 006" />
-      </div>
-      <span class="tag">#006</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/007.jpg" alt="Tarjeta 007" />
-      </div>
-      <span class="tag">#007</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/008.jpg" alt="Tarjeta 008" />
-      </div>
-      <span class="tag">#008</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/009.jpg" alt="Tarjeta 009" />
-      </div>
-      <span class="tag">#009</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/010.jpg" alt="Tarjeta 010" />
-      </div>
-      <span class="tag">#010</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/011.jpg" alt="Tarjeta 011" />
-      </div>
-      <span class="tag">#011</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/012.jpg" alt="Tarjeta 012" />
-      </div>
-      <span class="tag">#012</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/013.jpg" alt="Tarjeta 013" />
-      </div>
-      <span class="tag">#013</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/014.jpg" alt="Tarjeta 014" />
-      </div>
-      <span class="tag">#014</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/015.jpg" alt="Tarjeta 015" />
-      </div>
-      <span class="tag">#015</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/016.jpg" alt="Tarjeta 016" />
-      </div>
-      <span class="tag">#016</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/017.jpg" alt="Tarjeta 017" />
-      </div>
-      <span class="tag">#017</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/018.jpg" alt="Tarjeta 018" />
-      </div>
-      <span class="tag">#018</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/019.jpg" alt="Tarjeta 019" />
-      </div>
-      <span class="tag">#019</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/020.jpg" alt="Tarjeta 020" />
-      </div>
-      <span class="tag">#020</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/021.jpg" alt="Tarjeta 021" />
-      </div>
-      <span class="tag">#021</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/022.jpg" alt="Tarjeta 022" />
-      </div>
-      <span class="tag">#022</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/023.jpg" alt="Tarjeta 023" />
-      </div>
-      <span class="tag">#023</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/024.jpg" alt="Tarjeta 024" />
-      </div>
-      <span class="tag">#024</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/025.jpg" alt="Tarjeta 025" />
-      </div>
-      <span class="tag">#025</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/026.jpg" alt="Tarjeta 026" />
-      </div>
-      <span class="tag">#026</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/027.jpg" alt="Tarjeta 027" />
-      </div>
-      <span class="tag">#027</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/028.jpg" alt="Tarjeta 028" />
-      </div>
-      <span class="tag">#028</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/029.jpg" alt="Tarjeta 029" />
-      </div>
-      <span class="tag">#029</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/030.jpg" alt="Tarjeta 030" />
-      </div>
-      <span class="tag">#030</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/031.jpg" alt="Tarjeta 031" />
-      </div>
-      <span class="tag">#031</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/032.jpg" alt="Tarjeta 032" />
-      </div>
-      <span class="tag">#032</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/033.jpg" alt="Tarjeta 033" />
-      </div>
-      <span class="tag">#033</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/034.jpg" alt="Tarjeta 034" />
-      </div>
-      <span class="tag">#034</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/035.jpg" alt="Tarjeta 035" />
-      </div>
-      <span class="tag">#035</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/036.jpg" alt="Tarjeta 036" />
-      </div>
-      <span class="tag">#036</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/037.jpg" alt="Tarjeta 037" />
-      </div>
-      <span class="tag">#037</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/038.jpg" alt="Tarjeta 038" />
-      </div>
-      <span class="tag">#038</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/039.jpg" alt="Tarjeta 039" />
-      </div>
-      <span class="tag">#039</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/040.jpg" alt="Tarjeta 040" />
-      </div>
-      <span class="tag">#040</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/041.jpg" alt="Tarjeta 041" />
-      </div>
-      <span class="tag">#041</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/042.jpg" alt="Tarjeta 042" />
-      </div>
-      <span class="tag">#042</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/043.jpg" alt="Tarjeta 043" />
-      </div>
-      <span class="tag">#043</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/044.jpg" alt="Tarjeta 044" />
-      </div>
-      <span class="tag">#044</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/045.jpg" alt="Tarjeta 045" />
-      </div>
-      <span class="tag">#045</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/046.jpg" alt="Tarjeta 046" />
-      </div>
-      <span class="tag">#046</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/047.jpg" alt="Tarjeta 047" />
-      </div>
-      <span class="tag">#047</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/048.jpg" alt="Tarjeta 048" />
-      </div>
-      <span class="tag">#048</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/049.jpg" alt="Tarjeta 049" />
-      </div>
-      <span class="tag">#049</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/050.jpg" alt="Tarjeta 050" />
-      </div>
-      <span class="tag">#050</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/051.jpg" alt="Tarjeta 051" />
-      </div>
-      <span class="tag">#051</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/052.jpg" alt="Tarjeta 052" />
-      </div>
-      <span class="tag">#052</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/053.jpg" alt="Tarjeta 053" />
-      </div>
-      <span class="tag">#053</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/054.jpg" alt="Tarjeta 054" />
-      </div>
-      <span class="tag">#054</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/055.jpg" alt="Tarjeta 055" />
-      </div>
-      <span class="tag">#055</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/056.jpg" alt="Tarjeta 056" />
-      </div>
-      <span class="tag">#056</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/057.jpg" alt="Tarjeta 057" />
-      </div>
-      <span class="tag">#057</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/058.jpg" alt="Tarjeta 058" />
-      </div>
-      <span class="tag">#058</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/059.jpg" alt="Tarjeta 059" />
-      </div>
-      <span class="tag">#059</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/060.jpg" alt="Tarjeta 060" />
-      </div>
-      <span class="tag">#060</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/061.jpg" alt="Tarjeta 061" />
-      </div>
-      <span class="tag">#061</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/062.jpg" alt="Tarjeta 062" />
-      </div>
-      <span class="tag">#062</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/063.jpg" alt="Tarjeta 063" />
-      </div>
-      <span class="tag">#063</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/064.jpg" alt="Tarjeta 064" />
-      </div>
-      <span class="tag">#064</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/065.jpg" alt="Tarjeta 065" />
-      </div>
-      <span class="tag">#065</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/066.jpg" alt="Tarjeta 066" />
-      </div>
-      <span class="tag">#066</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/067.jpg" alt="Tarjeta 067" />
-      </div>
-      <span class="tag">#067</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/068.jpg" alt="Tarjeta 068" />
-      </div>
-      <span class="tag">#068</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/069.jpg" alt="Tarjeta 069" />
-      </div>
-      <span class="tag">#069</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/070.jpg" alt="Tarjeta 070" />
-      </div>
-      <span class="tag">#070</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/071.jpg" alt="Tarjeta 071" />
-      </div>
-      <span class="tag">#071</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/072.jpg" alt="Tarjeta 072" />
-      </div>
-      <span class="tag">#072</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/073.jpg" alt="Tarjeta 073" />
-      </div>
-      <span class="tag">#073</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/074.jpg" alt="Tarjeta 074" />
-      </div>
-      <span class="tag">#074</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/075.jpg" alt="Tarjeta 075" />
-      </div>
-      <span class="tag">#075</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/076.jpg" alt="Tarjeta 076" />
-      </div>
-      <span class="tag">#076</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/077.jpg" alt="Tarjeta 077" />
-      </div>
-      <span class="tag">#077</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/078.jpg" alt="Tarjeta 078" />
-      </div>
-      <span class="tag">#078</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/079.jpg" alt="Tarjeta 079" />
-      </div>
-      <span class="tag">#079</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/080.jpg" alt="Tarjeta 080" />
-      </div>
-      <span class="tag">#080</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/081.jpg" alt="Tarjeta 081" />
-      </div>
-      <span class="tag">#081</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/082.jpg" alt="Tarjeta 082" />
-      </div>
-      <span class="tag">#082</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/083.jpg" alt="Tarjeta 083" />
-      </div>
-      <span class="tag">#083</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/084.jpg" alt="Tarjeta 084" />
-      </div>
-      <span class="tag">#084</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/085.jpg" alt="Tarjeta 085" />
-      </div>
-      <span class="tag">#085</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/086.jpg" alt="Tarjeta 086" />
-      </div>
-      <span class="tag">#086</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/087.jpg" alt="Tarjeta 087" />
-      </div>
-      <span class="tag">#087</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/088.jpg" alt="Tarjeta 088" />
-      </div>
-      <span class="tag">#088</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/089.jpg" alt="Tarjeta 089" />
-      </div>
-      <span class="tag">#089</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/090.jpg" alt="Tarjeta 090" />
-      </div>
-      <span class="tag">#090</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/091.jpg" alt="Tarjeta 091" />
-      </div>
-      <span class="tag">#091</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/092.jpg" alt="Tarjeta 092" />
-      </div>
-      <span class="tag">#092</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/093.jpg" alt="Tarjeta 093" />
-      </div>
-      <span class="tag">#093</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/094.jpg" alt="Tarjeta 094" />
-      </div>
-      <span class="tag">#094</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/095.jpg" alt="Tarjeta 095" />
-      </div>
-      <span class="tag">#095</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/096.jpg" alt="Tarjeta 096" />
-      </div>
-      <span class="tag">#096</span>
-      <span class="status-rot status">Rotar 90°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/097.jpg" alt="Tarjeta 097" />
-      </div>
-      <span class="tag">#097</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/098.jpg" alt="Tarjeta 098" />
-      </div>
-      <span class="tag">#098</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/099.jpg" alt="Tarjeta 099" />
-      </div>
-      <span class="tag">#099</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/100.jpg" alt="Tarjeta 100" />
-      </div>
-      <span class="tag">#100</span>
-      <span class="status-rot status">Rotar 180°</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/101.jpg" alt="Tarjeta 101" />
-      </div>
-      <span class="tag">#101</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/102.jpg" alt="Tarjeta 102" />
-      </div>
-      <span class="tag">#102</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/103.jpg" alt="Tarjeta 103" />
-      </div>
-      <span class="tag">#103</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-    <div class="card-item">
-      <div class="img-wrap">
-        <img src="/cards/104.jpg" alt="Tarjeta 104" />
-      </div>
-      <span class="tag">#104</span>
-      <span class="status-ok status">Orientación OK</span>
-    </div>
-    
-</div>
+  <section id="export-panel" class="export-panel" aria-live="polite">
+    <div class="export-head">
+      <strong>Listado de rotaciones (ID → grados) listo para copiar y pegar en el chat:</strong>
+      <div>
+        <button type="button" id="btn-copy" class="btn btn-primary">Copiar listado</button>
+        <button type="button" id="btn-close-export" class="btn">Cerrar</button>
+      </div>
+    </div>
+    <textarea id="export-output" class="export-textarea" readonly></textarea>
+  </section>
+
+  <main id="cards-grid" class="grid"></main>
+  <div id="toast" class="toast">¡Copiado al portapapeles!</div>
+
+  <script>
+    const CARDS = [
+      [1, "Inicial P"], [2, "Inicial B"], [3, "Inicial I"], [4, "Inicial N"],
+      [5, "Inicial K"], [6, "Inicial T"], [7, "Inicial F"], [8, "Inicial Y"],
+      [9, "Inicial M"], [10, "Inicial D"], [11, "Inicial H"], [12, "Ho Ho Ho escocés"],
+      [13, "Inicial U"], [14, "Inicial O"], [15, "Ramo con esferas"], [16, "Puerta roja"],
+      [17, "Vela de acebo"], [18, "Corona verde"], [19, "Pino con lazo"], [20, "Santa clásico"],
+      [21, "Holly Jolly Merry Happy"], [22, "Warm Winter Wishes"], [23, "Merry Christmas to you"], [24, "Puerta de madera"],
+      [25, "Petirrojo invernal"], [26, "Pesebre con animales"], [27, "Ho Ho Ho festivo"], [28, "Farol rojo"],
+      [29, "Rama nevada"], [30, "Lazo escocés"], [31, "Guirnalda roja"], [32, "Sagrada Familia"],
+      [33, "Merry Christmas colorido"], [34, "Ho Ho Ho muñeco"], [35, "Guirnalda de piñas"], [36, "Santa de pie"],
+      [37, "Lazo marfil"], [38, "Merry Christmas gorro"], [39, "Merry Christmas acuarela"], [40, "Ho Ho Ho trineo"],
+      [41, "Puertita navideña"], [42, "Ángel dorado"], [43, "Lazo con esferas"], [44, "Cinta candy"],
+      [45, "Virgen y niño"], [46, "Moño rojo"], [47, "Farol y petirrojo"], [48, "Merry Christmas campanas"],
+      [49, "Regalo a rayas"], [50, "Merry Christmas duende"], [51, "Cascabeles"], [52, "Arbolito en maceta"],
+      [53, "Corona con moño"], [54, "Pino en cesta"], [55, "Ho! Ho! Ho!"], [56, "Traje de Santa"],
+      [57, "Piñas de pino"], [58, "Ho! bastones"], [59, "María"], [60, "Jarrón invernal"],
+      [61, "Casita roja"], [62, "Reno Merry Christmas"], [63, "Christmas caligrafía"], [64, "Pino dorado"],
+      [65, "Santa bailarín"], [66, "Guirnalda con moño"], [67, "Merry Christmas arbolitos"], [68, "Rama de invierno"],
+      [69, "Tronco festivo"], [70, "Frascos de eucalipto"], [71, "Love Christmas"], [72, "Carita de reno"],
+      [73, "Feliz Ho Ho"], [74, "Ramillete"], [75, "Velas y poinsettia"], [76, "Ho Ho Ho Santa"],
+      [77, "Vela de canela"], [78, "Merry Christmas bloque"], [79, "Angelitos"], [80, "Guirnalda natural"],
+      [81, "Arbolito de corazones"], [82, "Sagrada Familia acuarela"], [83, "Merry Christmas acebo"], [84, "Feliz Navidad en auto"],
+      [85, "Renito tierno"], [86, "Osito navideño"], [87, "Merry Christmas ilustrado"], [88, "Estrellas colgantes"],
+      [89, "Gnomo en trineo"], [90, "Gnomo estrella"], [91, "Estrella roja"], [92, "Santa North Pole"],
+      [93, "Calcetines rojos"], [94, "Calcetines tejidos"], [95, "Guirnalda de faroles"], [96, "Gnomo con esfera"],
+      [97, "Gnomo y renos"], [98, "Duendecita"], [99, "Angelita"], [100, "Ángel navideño"],
+      [101, "Patrón de pinos"], [102, "Esferas festivas"], [103, "Esferas colgantes"], [104, "Happy Holidays"]
+    ];
+
+    const STORAGE_KEY = "yaritza_card_rotations_v1";
+    let rotations = {};
+    try {
+      rotations = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+    } catch {
+      rotations = {};
+    }
+
+    let onlyRotated = false;
+    const gridEl = document.getElementById("cards-grid");
+    const countEl = document.getElementById("rotated-count");
+    const exportPanel = document.getElementById("export-panel");
+    const exportOutput = document.getElementById("export-output");
+    const toastEl = document.getElementById("toast");
+
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("is-visible");
+      setTimeout(() => toastEl.classList.remove("is-visible"), 2200);
+    }
+
+    function saveRotations() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rotations));
+      updateSummary();
+    }
+
+    function buildExportObject() {
+      const clean = {};
+      for (const [n] of CARDS) {
+        const id = "c" + n;
+        const deg = rotations[id] || 0;
+        if (deg !== 0) {
+          clean[id] = deg;
+        }
+      }
+      return clean;
+    }
+
+    function updateSummary() {
+      const clean = buildExportObject();
+      const total = Object.keys(clean).length;
+      countEl.textContent = total === 1 ? "1 tarjeta girada" : total + " tarjetas giradas";
+      exportOutput.value = JSON.stringify(clean, null, 2);
+    }
+
+    function renderGrid() {
+      gridEl.innerHTML = "";
+      for (const [n, name] of CARDS) {
+        const id = "c" + n;
+        const pad = String(n).padStart(3, "0");
+        const deg = rotations[id] || 0;
+        if (onlyRotated && deg === 0) continue;
+
+        const card = document.createElement("div");
+        card.className = "card-item" + (deg !== 0 ? " is-rotated" : "");
+        card.title = "Haz clic para girar 90°";
+        card.innerHTML =
+          '<div class="card-header">' +
+            '<span class="card-id">' + id + '</span>' +
+            '<span class="card-num">#' + pad + '</span>' +
+          '</div>' +
+          '<div class="img-wrap">' +
+            '<img src="/cards/' + pad + '.jpg" alt="' + name + '" loading="lazy" style="transform: rotate(' + deg + 'deg)" />' +
+          '</div>' +
+          '<div class="card-name">' + name + '</div>' +
+          '<div class="rot-badge">' + (deg === 0 ? "0° (Original)" : "Girada: " + deg + "° ↻") + '</div>';
+
+        card.addEventListener("click", () => {
+          const next = ((rotations[id] || 0) + 90) % 360;
+          if (next === 0) {
+            delete rotations[id];
+          } else {
+            rotations[id] = next;
+          }
+          saveRotations();
+          if (onlyRotated && next === 0) {
+            renderGrid();
+          } else {
+            const img = card.querySelector("img");
+            const badge = card.querySelector(".rot-badge");
+            img.style.transform = "rotate(" + next + "deg)";
+            badge.textContent = next === 0 ? "0° (Original)" : "Girada: " + next + "° ↻";
+            card.classList.toggle("is-rotated", next !== 0);
+          }
+        });
+
+        gridEl.appendChild(card);
+      }
+    }
+
+    document.getElementById("filter-all").addEventListener("click", (e) => {
+      onlyRotated = false;
+      e.currentTarget.classList.add("btn-active");
+      document.getElementById("filter-rotated").classList.remove("btn-active");
+      renderGrid();
+    });
+
+    document.getElementById("filter-rotated").addEventListener("click", (e) => {
+      onlyRotated = true;
+      e.currentTarget.classList.add("btn-active");
+      document.getElementById("filter-all").classList.remove("btn-active");
+      renderGrid();
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      if (confirm("¿Seguro que deseas reiniciar todas las rotaciones a 0°?")) {
+        rotations = {};
+        saveRotations();
+        renderGrid();
+        showToast("Rotaciones reiniciadas a 0°");
+      }
+    });
+
+    document.getElementById("btn-export").addEventListener("click", () => {
+      updateSummary();
+      exportPanel.classList.add("is-open");
+      exportOutput.select();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(exportOutput.value).then(() => {
+          showToast("¡Correcciones copiadas al portapapeles!");
+        }).catch(() => {});
+      }
+    });
+
+    document.getElementById("btn-copy").addEventListener("click", () => {
+      exportOutput.select();
+      navigator.clipboard.writeText(exportOutput.value).then(() => {
+        showToast("¡Listado copiado al portapapeles!");
+      });
+    });
+
+    document.getElementById("btn-close-export").addEventListener("click", () => {
+      exportPanel.classList.remove("is-open");
+    });
+
+    updateSummary();
+    renderGrid();
+  </script>
 </body>
 </html>

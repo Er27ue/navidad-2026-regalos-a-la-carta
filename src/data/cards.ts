@@ -22,7 +22,15 @@ export interface Card {
   ratio: number;
   image: string;
   accent?: string;
+  /** Rotación en grados (0, 90, 180 o 270) aplicada sin degradar la imagen original */
+  rotation?: 0 | 90 | 180 | 270;
 }
+
+/**
+ * Mapa de correcciones de orientación por ID de tarjeta (c1..c104).
+ * Generado desde /hoja-de-contactos.html con el botón "Exportar correcciones".
+ */
+export const CARD_ROTATIONS: Record<string, 0 | 90 | 180 | 270> = {};
 
 export const categories: { id: CategoryId; label: string; blurb: string; cover: string }[] = [
   {
@@ -194,15 +202,19 @@ function assignCategory(name: string, original: CategoryId | "decoracion"): Cate
   return "detalles";
 }
 
-export const cards: Card[] = raw.map(([n, name, originalCategory]) => ({
-  id: `c${n}`,
-  name,
-  category: assignCategory(name, originalCategory),
-  order: n,
-  thumb: `/cards/${String(n).padStart(3, "0")}.jpg`,
-  front: `/cards/${String(n).padStart(3, "0")}.jpg`,
-  back: `/cards/back.jpg`,
-  ratio: 0.72,
-  image: `/cards/${String(n).padStart(3, "0")}.jpg`,
-}));
+export const cards: Card[] = raw.map(([n, name, originalCategory]) => {
+  const id = `c${n}`;
+  return {
+    id,
+    name,
+    category: assignCategory(name, originalCategory),
+    order: n,
+    thumb: `/cards/${String(n).padStart(3, "0")}.jpg`,
+    front: `/cards/${String(n).padStart(3, "0")}.jpg`,
+    back: `/cards/back.jpg`,
+    ratio: 600 / 840,
+    image: `/cards/${String(n).padStart(3, "0")}.jpg`,
+    rotation: CARD_ROTATIONS[id] ?? 0,
+  };
+});
 

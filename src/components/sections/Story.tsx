@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Brush, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CATALOG_COPY, INSTAGRAM } from "@/config/contact";
-import { BrushBackdrop, FloatingBadge, Reveal } from "../decor/BrandExperience";
+import { BrushBackdrop, Reveal } from "../decor/BrandExperience";
 
 // Contenido fiel de la historia tomado directamente del PDF de Yaritza Madera
 const STORY_PAGES = [
@@ -95,31 +95,6 @@ export function Welcome() {
             height="480"
             fetchPriority="high"
           />
-          {/* Viñetas e insignias integradas de forma armoniosa al pie */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentPage(0);
-                setOpenStory(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-wine/20 bg-white/95 px-3 py-1.5 text-xs font-semibold text-wine shadow-sm hover:scale-105 active:scale-95 transition-all"
-            >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-peach/40 text-[10px] font-bold">20</span>
-              {CATALOG_COPY.artistBadgeYears}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentPage(1);
-                setOpenStory(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-wine/20 bg-white/95 px-3 py-1.5 text-xs font-semibold text-wine shadow-sm hover:scale-105 active:scale-95 transition-all"
-            >
-              <Brush size={13} className="text-olive" />
-              {CATALOG_COPY.artistBadgeRole}
-            </button>
-          </div>
         </Reveal>
 
         <div className="artist-copy">

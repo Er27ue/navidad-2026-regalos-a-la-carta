@@ -52,58 +52,91 @@ function orderAll(list: Card[]) {
   return result;
 }
 
+const QUICK_QUANTITIES = [1, 5, 10, 15, 20] as const;
+
+function cardRotationStyle(rotation?: 0 | 90 | 180 | 270) {
+  if (!rotation) return undefined;
+  return { transform: `rotate(${rotation}deg)` };
+}
+
 function QtyControl({
   value,
   label,
   onChange,
+  showQuick = false,
 }: {
   value: number;
   label: string;
   onChange: (value: number) => void;
+  showQuick?: boolean;
 }) {
   const commit = (raw: string) =>
     onChange(raw.trim() === "" ? 0 : Math.max(0, Math.min(999, Number.parseInt(raw, 10) || 0)));
   return (
     <div
-      className="card-qty"
-      aria-label={`Cantidad de ${label}`}
+      className="card-qty-group"
       onClick={(event) => event.stopPropagation()}
     >
-      <button
-        type="button"
-        aria-label={`Restar ${label}`}
-        onClick={() => onChange(Math.max(0, value - 1))}
+      <div
+        className={`card-qty ${value === 0 ? "is-empty" : "is-active"}`}
+        aria-label={`Cantidad de ${label}`}
       >
-        <Minus size={15} />
-      </button>
-      {value === 0 ? (
-        <button
-          type="button"
-          className="qty-add"
-          aria-label={`Añadir ${label} al pedido`}
-          onClick={() => onChange(1)}
-        >
-          <Plus size={16} /> Añadir
-        </button>
-      ) : (
-        <input
-          type="number"
-          inputMode="numeric"
-          min="0"
-          max="999"
-          aria-label={`Unidades de ${label}`}
-          value={value}
-          onFocus={(event) => event.currentTarget.select()}
-          onChange={(event) => commit(event.target.value)}
-        />
+        {value === 0 ? (
+          <button
+            type="button"
+            className="qty-add"
+            aria-label={`Añadir ${label} al pedido`}
+            onClick={() => onChange(1)}
+          >
+            <Plus size={15} aria-hidden="true" />
+            <span>Añadir</span>
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="qty-step"
+              aria-label={`Restar ${label}`}
+              onClick={() => onChange(Math.max(0, value - 1))}
+            >
+              <Minus size={15} />
+            </button>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              max="999"
+              aria-label={`Unidades de ${label}`}
+              value={value}
+              onFocus={(event) => event.currentTarget.select()}
+              onChange={(event) => commit(event.target.value)}
+            />
+            <button
+              type="button"
+              className="qty-step"
+              aria-label={`Sumar ${label}`}
+              onClick={() => onChange(Math.min(999, value + 1))}
+            >
+              <Plus size={15} />
+            </button>
+          </>
+        )}
+      </div>
+      {showQuick && (
+        <div className="card-quick-qty" role="group" aria-label={`Cantidades rápidas para ${label}`}>
+          {QUICK_QUANTITIES.map((n) => (
+            <button
+              type="button"
+              key={n}
+              aria-pressed={value === n}
+              className={value === n ? "is-active" : ""}
+              onClick={() => onChange(value === n ? 0 : n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
       )}
-      <button
-        type="button"
-        aria-label={`Sumar ${label}`}
-        onClick={() => onChange(Math.min(999, value + 1))}
-      >
-        <Plus size={15} />
-      </button>
     </div>
   );
 }
@@ -133,7 +166,7 @@ function ProductCard({
   onOpen: () => void;
 }) {
   return (
-    <Reveal className={`product-card ${quantity ? "is-selected" : ""}`}>
+    <article className={`product-card ${quantity ? "is-selected" : ""}`}>
       <button
         type="button"
         className="product-preview"
@@ -144,10 +177,11 @@ function ProductCard({
           <img
             src={card.thumb}
             alt={`Frente de la tarjeta ${card.name}`}
-            width="640"
-            height="480"
+            width="600"
+            height="840"
             loading="lazy"
             decoding="async"
+            style={cardRotationStyle(card.rotation)}
           />
           <span className="product-glint" aria-hidden="true" />
           {quantity > 0 && <span className="qty-seal">×{quantity}</span>}
@@ -157,8 +191,8 @@ function ProductCard({
         <span className="product-category">{categoryLabel(card.category)}</span>
         <h3>{card.name}</h3>
       </div>
-      <QtyControl value={quantity} label={card.name} onChange={onQuantity} />
-    </Reveal>
+      <QtyControl value={quantity} label={card.name} onChange={onQuantity} showQuick />
+    </article>
   );
 }
 
@@ -180,7 +214,12 @@ function CategoryMosaics({
         ][index]!;
         return (
           <button className="category-mosaic" type="button" key={id} onClick={() => onChoose(id)}>
-            <img src={card.thumb} alt="" loading="lazy" />
+            <img
+              src={card.thumb}
+              alt=""
+              loading="lazy"
+              style={cardRotationStyle(card.rotation)}
+            />
             <span>{label}</span>
             <small>{counts[id]} diseños</small>
           </button>
@@ -265,6 +304,7 @@ function CardModal({
                 src={card.front}
                 alt={`Frente de la tarjeta ${card.name}`}
                 fetchPriority="high"
+                style={cardRotationStyle(card.rotation)}
               />
             </div>
             <div className="modal-face modal-reverse" aria-hidden={!back}>
@@ -342,6 +382,10 @@ export function Catalog({
     ),
   );
   const gridRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const gridBoxRef = useRef<HTMLDivElement>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const [fadeTick, setFadeTick] = useState(0);
   useEffect(() => {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
@@ -378,29 +422,97 @@ export function Catalog({
   const pageCount = Math.ceil(list.length / 12);
   const safePage = Math.min(page, Math.max(1, pageCount));
   const visible = list.slice((safePage - 1) * 12, safePage * 12);
-  const movePage = (next: number) => {
+  const notifyLenisResize = () => {
+    const lenis = (window as unknown as { __lenis?: { resize?: () => void } }).__lenis;
+    lenis?.resize?.();
+  };
+  const scrollToCatalogTop = () => {
+    requestAnimationFrame(() => {
+      const anchor = controlsRef.current ?? gridRef.current;
+      if (!anchor) return;
+      const lenis = (
+        window as unknown as {
+          __lenis?: {
+            resize?: () => void;
+            scrollTo: (
+              target: HTMLElement,
+              options?: {
+                offset?: number;
+                duration?: number;
+                immediate?: boolean;
+                lock?: boolean;
+                force?: boolean;
+                easing?: (t: number) => number;
+              },
+            ) => void;
+          };
+        }
+      ).__lenis;
+      const offset = window.innerWidth >= 768 ? -72 : -12;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (lenis) {
+        lenis.resize?.();
+        lenis.scrollTo(anchor, {
+          offset,
+          immediate: reduceMotion,
+          force: true,
+          duration: 0.5,
+          easing: (t) => 1 - Math.pow(1 - t, 3),
+        });
+      } else {
+        const top = anchor.getBoundingClientRect().top + window.scrollY + offset;
+        window.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? "auto" : "smooth" });
+      }
+    });
+  };
+  // Congela la altura de la cuadrícula sin acumular timers cuando se pulsa 1 -> 2 -> 3 rápido.
+  const holdGridHeight = (durationMs = 650) => {
+    const box = gridBoxRef.current;
+    if (!box) return;
+    const currentH = box.offsetHeight;
+    if (currentH > 0) {
+      box.style.minHeight = `${currentH}px`;
+    }
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current);
+    }
+    holdTimerRef.current = window.setTimeout(() => {
+      if (gridBoxRef.current) {
+        gridBoxRef.current.style.minHeight = "";
+      }
+      notifyLenisResize();
+      holdTimerRef.current = null;
+    }, durationMs);
+  };
+  const movePage = (next: number, source: "top" | "bottom" = "top") => {
+    if (next === safePage) return;
+    holdGridHeight(source === "bottom" ? 700 : 350);
     setPage(next);
+    setFadeTick((t) => t + 1);
     const url = new URL(window.location.href);
     url.searchParams.set("cat", filter);
     url.searchParams.set("p", String(next));
     if (query) url.searchParams.set("q", query);
     history.pushState({}, "", url);
-    requestAnimationFrame(() => {
-      document.querySelector("#catalogo-grid-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    if (source === "bottom") {
+      scrollToCatalogTop();
+    } else {
+      requestAnimationFrame(notifyLenisResize);
+    }
   };
   const chooseFilter = (next: Filter) => {
+    if (next === filter && letter === "" && safePage === 1) return;
+    holdGridHeight(350);
     setFilter(next);
     setLetter("");
     setPage(1);
+    setFadeTick((t) => t + 1);
     const url = new URL(window.location.href);
     if (next === "todas") url.searchParams.delete("cat");
     else url.searchParams.set("cat", next);
     url.searchParams.delete("p");
     history.pushState({}, "", url);
-    requestAnimationFrame(() => {
-      document.querySelector("#catalogo-grid-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    requestAnimationFrame(notifyLenisResize);
   };
   const modalIndex = open ? list.findIndex((card) => card.id === open) : -1;
   return (
@@ -412,7 +524,7 @@ export function Catalog({
           <p>Pequeños detalles para acompañar grandes regalos.</p>
         </div>
       </Reveal>
-      <div className="catalog-controls">
+      <div ref={controlsRef} className="catalog-controls">
         <div className="category-scroll-hint">
           <div role="group" aria-label="Filtrar por categoría" className="category-filter">
             {options.map(({ id, label }) => (
@@ -466,8 +578,10 @@ export function Catalog({
                   type="button"
                   aria-pressed={letter === initial}
                   onClick={() => {
+                    holdGridHeight(300);
                     setLetter(letter === initial ? "" : initial);
                     setPage(1);
+                    setFadeTick((t) => t + 1);
                   }}
                 >
                   {initial}
@@ -481,7 +595,7 @@ export function Catalog({
               type="button"
               disabled={safePage === 1}
               aria-label="Página anterior"
-              onClick={() => movePage(Math.max(1, safePage - 1))}
+              onClick={() => movePage(Math.max(1, safePage - 1), "top")}
             >
               ‹
             </button>
@@ -495,7 +609,7 @@ export function Catalog({
                   key={n}
                   aria-label={`Página ${n}`}
                   aria-current={safePage === n ? "page" : undefined}
-                  onClick={() => movePage(n)}
+                  onClick={() => movePage(n, "top")}
                 >
                   {n}
                 </button>
@@ -504,7 +618,7 @@ export function Catalog({
               type="button"
               disabled={safePage === pageCount}
               aria-label="Página siguiente"
-              onClick={() => movePage(Math.min(pageCount, safePage + 1))}
+              onClick={() => movePage(Math.min(pageCount, safePage + 1), "top")}
             >
               ›
             </button>
@@ -512,7 +626,11 @@ export function Catalog({
         )}
       </div>
       <div id="catalogo-grid-anchor" ref={gridRef} className="scroll-mt-6" />
-      <div className="catalog-grid transition-opacity duration-300">
+      <div
+        ref={gridBoxRef}
+        data-fade={fadeTick % 2}
+        className={`catalog-grid ${fadeTick % 2 === 0 ? "catalog-grid-fade-a" : "catalog-grid-fade-b"} ${pageCount > 1 ? "has-multiple-pages" : ""}`}
+      >
         {visible.map((card) => (
           <ProductCard
             key={card.id}
@@ -523,10 +641,40 @@ export function Catalog({
           />
         ))}
       </div>
-      {pageCount > 1 && safePage < pageCount && (
-        <button type="button" className="catalog-next" onClick={() => movePage(safePage + 1)}>
-          Siguiente →
-        </button>
+      {pageCount > 1 && (
+        <nav aria-label="Páginas del catálogo (inferior)" className="catalog-pagination catalog-pagination-bottom">
+          <button
+            type="button"
+            disabled={safePage === 1}
+            aria-label="Página anterior"
+            onClick={() => movePage(Math.max(1, safePage - 1), "bottom")}
+          >
+            ‹
+          </button>
+          {Array.from({ length: Math.min(pageCount, 5) }, (_, i) =>
+            Math.min(Math.max(1, safePage - 2) + i, pageCount),
+          )
+            .filter((n, i, all) => all.indexOf(n) === i)
+            .map((n) => (
+              <button
+                type="button"
+                key={n}
+                aria-label={`Página ${n}`}
+                aria-current={safePage === n ? "page" : undefined}
+                onClick={() => movePage(n, "bottom")}
+              >
+                {n}
+              </button>
+            ))}
+          <button
+            type="button"
+            disabled={safePage === pageCount}
+            aria-label="Página siguiente"
+            onClick={() => movePage(Math.min(pageCount, safePage + 1), "bottom")}
+          >
+            ›
+          </button>
+        </nav>
       )}
       <AnimatePresence>
         {modalIndex >= 0 && (

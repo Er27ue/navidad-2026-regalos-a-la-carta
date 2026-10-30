@@ -57,21 +57,36 @@ function Index() {
     url.searchParams.set("cat", next);
     url.searchParams.delete("p");
     window.history.pushState({}, "", url);
-    window.setTimeout(
-      () => document.querySelector("#catalogo")?.scrollIntoView({ behavior: "smooth" }),
-      40,
-    );
+    window.setTimeout(() => {
+      const target = document.querySelector<HTMLElement>("#catalogo");
+      if (!target) return;
+      const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (lenis) {
+        lenis.scrollTo(target, {
+          immediate: reduceMotion,
+          duration: 0.55,
+          easing: (t) => 1 - Math.pow(1 - t, 3),
+        });
+      } else {
+        target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+      }
+    }, 40);
   };
 
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.05,
       smoothWheel: true,
-      syncTouch: true,
+      syncTouch: false,
       autoRaf: true,
       respectReducedMotion: true,
     });
-    return () => lenis.destroy();
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+    return () => {
+      delete (window as unknown as { __lenis?: Lenis }).__lenis;
+      lenis.destroy();
+    };
   }, []);
   useEffect(() => {
     const onPop = () => {

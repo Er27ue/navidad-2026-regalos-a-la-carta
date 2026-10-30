@@ -249,7 +249,18 @@ export function ContactSection({
                       {lines.map(({ card, quantity }) => (
                         <tr key={card.id}>
                           <td className="order-card-cell">
-                            <img src={card.thumb} alt="" width="56" height="52" loading="lazy" />
+                            <img
+                              src={card.thumb}
+                              alt=""
+                              width="42"
+                              height="59"
+                              loading="lazy"
+                              style={
+                                card.rotation
+                                  ? { transform: `rotate(${card.rotation}deg)` }
+                                  : undefined
+                              }
+                            />
                             <span>{card.name}</span>
                             <small>{CATEGORY_NAMES[card.category]}</small>
                           </td>
